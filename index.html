@@ -1,0 +1,2738 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unimed Obras</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --g:#00843D;--g2:#006B31;--gd:#004D23;
+  --gl:#E8F5E9;--gb:#C8E6C9;
+  --bg:#F0F2F5;--card:#fff;
+  --border:#E2E6EA;--border2:#CDD3DA;
+  --txt:#111827;--txt2:#4B5563;--txt3:#9CA3AF;
+  --warn:#D97706;--err:#DC2626;--info:#1D4ED8;
+  --ok:#15803D;
+  --r:12px;
+  --sh:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
+  --font:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--txt);font-size:14px;min-height:100vh}
+button,select,input,textarea{font-family:inherit}
+button{cursor:pointer}
+
+.app{display:flex;min-height:100vh}
+.sb{width:230px;background:var(--gd);display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:100;flex-shrink:0}
+.main{margin-left:230px;flex:1;display:flex;flex-direction:column}
+
+.sb-head{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.1)}
+.sb-logo{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.sb-icon{width:36px;height:36px;background:var(--g);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sb-brand{font-size:15px;font-weight:700;color:#fff;line-height:1.2}
+.sb-sub{font-size:11px;color:rgba(255,255,255,.5);margin-top:2px}
+
+.nav-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(255,255,255,.35);padding:18px 20px 6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;font-size:13px;font-weight:500;color:rgba(255,255,255,.65);border:none;background:none;width:100%;text-align:left;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.nav-item:hover{color:#fff;background:rgba(255,255,255,.06)}
+.nav-item.on{color:#fff;background:rgba(255,255,255,.1);border-left-color:var(--gb)}
+.nav-item .ni{font-size:16px;width:20px;text-align:center;opacity:.7}
+.nav-item.on .ni{opacity:1}
+
+.nav-label.units{padding-top:10px}
+.unit-item{display:flex;align-items:center;gap:10px;padding:8px 20px 8px 24px;font-size:12px;font-weight:400;color:rgba(255,255,255,.55);border:none;background:none;width:100%;text-align:left;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.unit-item:hover{color:rgba(255,255,255,.9);background:rgba(255,255,255,.05)}
+.unit-item.on{color:#fff;font-weight:600;border-left-color:var(--gb);background:rgba(255,255,255,.08)}
+.unit-dot{width:7px;height:7px;border-radius:50%;background:var(--gb);opacity:.5;flex-shrink:0}
+.unit-item.on .unit-dot{opacity:1;background:#69F0AE}
+
+.sb-url-box{margin:auto 14px 14px;padding:12px 14px;background:rgba(255,255,255,.07);border-radius:var(--r);border:1px solid rgba(255,255,255,.1)}
+.sb-url-box label{font-size:10px;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px}
+.sb-url-box input{width:100%;font-size:11px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:6px 8px;color:#fff;outline:none}
+.sb-url-box input::placeholder{color:rgba(255,255,255,.3)}
+.sb-sync{margin:0 14px 14px;width:calc(100% - 28px);padding:10px;background:var(--g);color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s}
+.sb-sync:hover{background:var(--g2)}
+.sync-st{font-size:10px;color:rgba(255,255,255,.4);text-align:center;padding-bottom:6px}
+
+.topbar{background:#fff;border-bottom:1px solid var(--border);padding:16px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.tp-title{font-size:18px;font-weight:700;color:var(--txt)}
+.tp-sub{font-size:12px;color:var(--txt3);margin-top:2px}
+.tp-actions{display:flex;gap:8px}
+.btn-g{display:flex;align-items:center;gap:6px;padding:9px 18px;background:var(--g);color:#fff;border:none;border-radius:9px;font-size:13px;font-weight:600;transition:background .15s}
+.btn-g:hover{background:var(--g2)}
+.btn-s{display:flex;align-items:center;gap:6px;padding:9px 14px;background:#fff;color:var(--txt2);border:1px solid var(--border2);border-radius:9px;font-size:13px;font-weight:500;transition:all .15s}
+.btn-s:hover{border-color:var(--g);color:var(--g)}
+.btn-danger{display:flex;align-items:center;gap:6px;padding:7px 12px;background:#FEF2F2;color:var(--err);border:1px solid #FECACA;border-radius:8px;font-size:12px;font-weight:600;transition:all .15s}
+.btn-danger:hover{background:var(--err);color:#fff}
+.btn-sm-g{padding:6px 12px;background:var(--g);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;transition:background .15s}
+.btn-sm-g:hover{background:var(--g2)}
+.btn-sm-s{padding:6px 12px;background:#fff;color:var(--txt2);border:1px solid var(--border2);border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;transition:all .15s}
+.btn-sm-s:hover{border-color:var(--g);color:var(--g)}
+.btn-sm-warn{padding:6px 12px;background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-sm-warn:hover{background:#F59E0B;color:#fff}
+
+.content{padding:28px;flex:1}
+.pg{display:none}.pg.on{display:block}
+
+.notify{display:none;padding:11px 16px;border-radius:9px;font-size:13px;margin-bottom:18px;align-items:center;gap:8px;font-weight:500}
+.notify.show{display:flex}
+.notify.ok{background:#ECFDF5;color:var(--ok);border:1px solid var(--gb)}
+.notify.warn{background:#FFFBEB;color:var(--warn);border:1px solid #FDE68A}
+.notify.err{background:#FEF2F2;color:var(--err);border:1px solid #FECACA}
+.notify.info{background:#EFF6FF;color:var(--info);border:1px solid #BFDBFE}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;margin-bottom:16px;box-shadow:var(--sh)}
+.sec-t{font-size:13px;font-weight:700;color:var(--txt);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.sec-t span{font-size:12px;font-weight:400;color:var(--txt3)}
+
+.unit-header{background:linear-gradient(135deg,var(--gd) 0%,var(--g2) 60%,var(--g) 100%);border-radius:var(--r);padding:22px 24px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 4px 20px rgba(0,77,35,.2)}
+.uh-name{font-size:22px;font-weight:700;color:#fff}
+.uh-sub{font-size:13px;color:rgba(255,255,255,.65);margin-top:3px}
+.uh-badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.uh-stat{text-align:right;color:#fff}
+.uh-stat-v{font-size:28px;font-weight:700;line-height:1}
+.uh-stat-l{font-size:11px;opacity:.65;margin-top:2px}
+
+.obras-list{display:flex;flex-direction:column;gap:10px}
+.obra-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:16px 20px;cursor:pointer;transition:all .2s;display:grid;grid-template-columns:auto 1fr auto auto auto;gap:16px;align-items:center}
+.obra-card:hover{border-color:var(--gb);box-shadow:0 2px 12px rgba(0,132,61,.08)}
+.obra-card.expanded{border-color:var(--g);border-bottom-left-radius:0;border-bottom-right-radius:0}
+.obra-num{font-family:var(--mono);font-size:11px;color:var(--txt3);background:var(--bg);padding:4px 8px;border-radius:6px;white-space:nowrap}
+.obra-name{font-size:14px;font-weight:600;color:var(--txt)}
+.obra-meta{font-size:11px;color:var(--txt3);margin-top:2px}
+.obra-pct{font-size:13px;font-weight:700;color:var(--g);text-align:right;white-space:nowrap}
+.obra-val{font-size:12px;font-weight:600;color:var(--txt2);text-align:right;white-space:nowrap}
+
+.obra-detail{background:#FAFBFC;border:1px solid var(--g);border-top:none;border-bottom-left-radius:var(--r);border-bottom-right-radius:var(--r);padding:18px 20px;display:none}
+.obra-detail.show{display:block}
+
+.pbar{height:5px;background:var(--border);border-radius:3px;margin-top:5px;overflow:hidden}
+.pfill{height:100%;border-radius:3px;background:var(--g);transition:width .4s}
+.pbar-lg{height:10px;background:var(--border);border-radius:5px;overflow:hidden;margin-top:6px}
+.pfill-lg{height:100%;border-radius:5px;background:var(--g);transition:width .5s}
+
+.bdg{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.bdg-g{background:#DCFCE7;color:#166534}
+.bdg-o{background:#FEF3C7;color:#92400E}
+.bdg-b{background:#DBEAFE;color:#1E40AF}
+.bdg-r{background:#FEE2E2;color:#991B1B}
+.bdg-gray{background:var(--bg);color:var(--txt2)}
+.bdg-p{background:#F3E8FF;color:#6B21A8}
+.bdg-teal{background:#CCFBF1;color:#0F766E}
+
+.form-g{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.form-g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px}
+.form-full{grid-column:1/-1}
+.fld label{display:block;font-size:11px;font-weight:700;color:var(--txt2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.04em}
+.fld input,.fld select,.fld textarea{width:100%;font-size:13px;border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--txt);background:#fff;transition:border .15s;outline:none}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--g);box-shadow:0 0 0 3px rgba(0,132,61,.08)}
+.fld textarea{resize:vertical;min-height:80px;line-height:1.6}
+.fld-hint{font-size:11px;color:var(--txt3);margin-top:4px}
+
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;padding:8px 12px;background:var(--bg);border-bottom:1px solid var(--border)}
+td{padding:11px 12px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:#F9FAFB}
+
+.upload{border:2px dashed var(--gb);border-radius:var(--r);padding:32px;text-align:center;cursor:pointer;background:var(--gl);transition:all .2s;position:relative}
+.upload:hover{border-color:var(--g);background:#E0F2E7}
+.upload input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-ico{font-size:36px;display:block;margin-bottom:10px}
+.upload p{font-size:13px;color:var(--txt2)}
+.upload strong{color:var(--g)}
+.upload small{display:block;font-size:11px;color:var(--txt3);margin-top:6px}
+
+.orc-card{display:grid;grid-template-columns:48px 1fr auto;gap:14px;align-items:center;padding:14px 18px;border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;cursor:pointer;transition:all .2s;background:#fff}
+.orc-card:hover{border-color:var(--gb)}
+.orc-card.sel{border-color:var(--g);border-width:2px;background:var(--gl)}
+.orc-ini{width:44px;height:44px;border-radius:10px;background:var(--g);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff}
+.orc-n{font-weight:700;font-size:13px;color:var(--txt)}
+.orc-s{font-size:12px;color:var(--txt3);margin-top:2px}
+.orc-v{font-size:16px;font-weight:700;color:var(--txt);text-align:right}
+.orc-tag{font-size:11px;text-align:right;margin-top:4px}
+
+.ai-box{background:var(--gl);border-left:4px solid var(--g);border-radius:0 var(--r) var(--r) 0;padding:14px 18px;margin:16px 0}
+.ai-t{font-size:12px;font-weight:700;color:var(--g);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.ai-box p{font-size:13px;color:var(--txt);line-height:1.7}
+
+/* ── PRESTADORES ── */
+.prest-list{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.prest-row{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:10px;align-items:center;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:10px 12px}
+.prest-row .prest-nome{font-size:13px;font-weight:600;color:var(--txt)}
+.prest-row .prest-info{font-size:11px;color:var(--txt3)}
+.prest-empty{font-size:12px;color:var(--txt3);padding:10px;text-align:center;background:var(--bg);border-radius:8px;border:1px dashed var(--border2)}
+.add-prest-area{background:var(--gl);border:1px solid var(--gb);border-radius:var(--r);padding:14px 16px;margin-bottom:12px}
+.add-prest-title{font-size:12px;font-weight:700;color:var(--g);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+
+/* ── ACOMPANHAMENTO ── */
+.acomp-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px;overflow:hidden}
+.acomp-header{padding:16px 20px;display:grid;grid-template-columns:1fr auto auto;gap:12px;align-items:center;cursor:pointer;transition:background .15s}
+.acomp-header:hover{background:#F9FAFB}
+.acomp-body{padding:18px 20px;border-top:1px solid var(--border);display:none}
+.acomp-body.show{display:block}
+
+.log-entry{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)}
+.log-entry:last-child{border-bottom:none}
+.log-dot{width:8px;height:8px;border-radius:50%;background:var(--g);margin-top:5px;flex-shrink:0}
+.log-data{font-size:11px;color:var(--txt3);white-space:nowrap;margin-top:2px}
+.log-txt{font-size:13px;color:var(--txt);line-height:1.5}
+.log-status{font-size:11px;margin-top:4px}
+
+.pct-input{width:100%;border:1px solid var(--border2);border-radius:7px;padding:6px 10px;font-size:13px;font-weight:600;color:var(--g);text-align:center;font-family:var(--mono)}
+.pct-input:focus{border-color:var(--g);outline:none}
+
+/* ── ATIVIDADE ATUAL ── */
+.ativ-box{background:var(--gl);border:1px solid var(--gb);border-radius:9px;padding:10px 14px;margin-top:8px;font-size:12px}
+.ativ-box strong{color:var(--g);display:block;font-size:10px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.ativ-box span{color:var(--txt);line-height:1.5}
+
+/* ── PRESTADOR ACOMPANHAMENTO ── */
+.prest-acomp-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:10px}
+.prest-acomp-header{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px;cursor:pointer;margin-bottom:0}
+.prest-acomp-header.open{margin-bottom:14px}
+.prest-acomp-name{font-size:13px;font-weight:700;color:var(--txt)}
+.prest-acomp-serv{font-size:11px;color:var(--txt3);margin-top:2px}
+.prest-acomp-pct{font-size:18px;font-weight:700;color:var(--g);white-space:nowrap}
+.prest-update-form{background:#fff;border:1px solid var(--border);border-radius:9px;padding:14px;display:none}
+.prest-update-form.show{display:block}
+
+/* ── DASHBOARD ── */
+.dash-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh)}
+.kpi-icon{font-size:22px;margin-bottom:8px}
+.kpi-val{font-size:26px;font-weight:700;color:var(--txt);line-height:1}
+.kpi-lbl{font-size:11px;color:var(--txt3);margin-top:4px;font-weight:500}
+.kpi-sub{font-size:12px;color:var(--g);margin-top:6px;font-weight:600}
+
+.dash-obras-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px}
+.dash-obra-card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:0;cursor:pointer;transition:box-shadow .15s,border-color .15s}
+.dash-obra-card:hover{border-color:var(--g);box-shadow:0 2px 12px rgba(0,132,61,.10)}
+.kpi-card{transition:box-shadow .15s,transform .1s;cursor:pointer}
+.kpi-card:hover{box-shadow:0 4px 18px rgba(0,132,61,.13);transform:translateY(-2px)}
+.kpi-active{border:2px solid var(--g)!important;background:var(--gl)!important;transform:translateY(-2px)}
+.kpi-hint{font-size:10px;color:var(--g);font-weight:600;margin-top:6px;opacity:.7;text-transform:uppercase;letter-spacing:.05em}
+.kpi-active .kpi-hint{opacity:1}
+.dash-filtro-btn{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--txt2);cursor:pointer;transition:all .15s;white-space:nowrap}
+.dash-filtro-btn:hover{border-color:var(--g);color:var(--g)}
+.dash-filtro-btn.on{background:var(--g);border-color:var(--g);color:#fff}
+.dash-obra-card:hover{border-color:var(--gb);box-shadow:0 4px 20px rgba(0,132,61,.1)}
+.dash-obra-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
+.dash-obra-nome{font-size:14px;font-weight:700;color:var(--txt)}
+.dash-obra-unit{font-size:11px;color:var(--txt3);margin-top:2px}
+.dash-obra-pct-big{font-size:28px;font-weight:700;color:var(--g)}
+.dash-obra-pct-lbl{font-size:10px;color:var(--txt3);text-align:right}
+.dash-custo-box{background:var(--bg);border-radius:8px;padding:10px 12px;margin-top:10px}
+.dash-custo-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:12px}
+.dash-custo-row-total{display:flex;justify-content:space-between;align-items:center;padding:6px 0 0;margin-top:4px;border-top:1px solid var(--border);font-size:13px;font-weight:700;color:var(--txt)}
+.dash-custo-lbl{color:var(--txt3)}
+.dash-custo-val{font-weight:600;color:var(--txt2)}
+
+.bar-chart{margin-top:6px}
+.bar-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:12px}
+.bar-label{width:120px;color:var(--txt2);text-overflow:ellipsis;overflow:hidden;white-space:nowrap;flex-shrink:0}
+.bar-track{flex:1;height:18px;background:var(--bg);border-radius:4px;overflow:hidden;position:relative}
+.bar-fill{height:100%;border-radius:4px;background:var(--g);transition:width .5s;display:flex;align-items:center;padding-left:6px;font-size:10px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden}
+.bar-fill-warn{background:var(--warn)}
+.bar-fill-err{background:var(--err)}
+
+/* Status distribution */
+.status-dist{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.status-pill{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;display:flex;align-items:center;gap:5px}
+
+/* Custo total card */
+.custo-total-card{background:linear-gradient(135deg,var(--gd),var(--g));border-radius:var(--r);padding:20px 24px;color:#fff;margin-bottom:16px;box-shadow:0 4px 20px rgba(0,77,35,.2)}
+.ct-label{font-size:12px;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.ct-val{font-size:36px;font-weight:700;line-height:1}
+.ct-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-top:16px}
+.ct-item{background:rgba(255,255,255,.1);border-radius:9px;padding:12px}
+.ct-item-lbl{font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.ct-item-val{font-size:18px;font-weight:700}
+
+@media(max-width:1100px){
+  .dash-grid{grid-template-columns:1fr 1fr}
+  .dash-obras-grid{grid-template-columns:1fr}
+}
+@media(max-width:860px){
+  .sb{width:56px}.main{margin-left:56px}
+  .sb-brand,.sb-sub,.nav-item span,.unit-item span,.sb-url-box,.sync-st,.nav-label{display:none}
+  .nav-item,.unit-item{justify-content:center;padding:12px}
+  .obra-card{grid-template-columns:1fr auto auto}
+  .form-g,.form-g3{grid-template-columns:1fr}
+  .dash-grid{grid-template-columns:1fr 1fr}
+  .ct-grid{grid-template-columns:1fr}
+  .prest-row{grid-template-columns:1fr 1fr auto}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ══ SIDEBAR ══════════════════════════════════════════════ -->
+<aside class="sb">
+  <div class="sb-head">
+    <div class="sb-logo">
+      <div class="sb-icon">🏥</div>
+      <div>
+        <div class="sb-brand">Unimed Obras</div>
+        <div class="sb-sub">Gestão de infraestrutura</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="nav-label">Menu</div>
+  <button class="nav-item on" onclick="navMenu('dashboard',this)"><span class="ni">📊</span><span>Dashboard</span></button>
+  <button class="nav-item" onclick="navMenu('cadastrar',this)"><span class="ni">📋</span><span>Cadastrar obra</span></button>
+  <button class="nav-item" onclick="navMenu('atualizar',this)"><span class="ni">🔄</span><span>Acompanhamento</span></button>
+  <button class="nav-item" onclick="navMenu('orcamentos',this)"><span class="ni">💰</span><span>Orçamentos</span></button>
+
+  <div class="nav-label units">Unidades</div>
+  <button class="unit-item on" onclick="selUnit('Matriz',this)"><div class="unit-dot"></div><span>Matriz</span></button>
+  <button class="unit-item" onclick="selUnit('Campo Novo Parecis',this)"><div class="unit-dot"></div><span>Campo Novo Parecis</span></button>
+  <button class="unit-item" onclick="selUnit('Sapezal',this)"><div class="unit-dot"></div><span>Sapezal</span></button>
+  <button class="unit-item" onclick="selUnit('Barra do Bugres',this)"><div class="unit-dot"></div><span>Barra do Bugres</span></button>
+  <button class="unit-item" onclick="selUnit('Oncologia',this)"><div class="unit-dot"></div><span>Oncologia</span></button>
+  <button class="unit-item" onclick="selUnit('CMU',this)"><div class="unit-dot"></div><span>CMU</span></button>
+
+  <div class="sb-url-box">
+    <label>URL Google Apps Script</label>
+    <input type="text" id="gs-url" placeholder="https://script.google.com/macros/s/AKfycbzpdjlgW_OW4ZIZLzenWN3sJMdj_WqnAWcLNKaJcNXSX-EvIbTZshM32ypxCn32dJWLFQ/exec" oninput="salvarUrl()" style="font-size:10px;word-break:break-all">
+    <div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:5px">Cole a URL após implantar o script no Google Apps Script</div>
+  </div>
+  <div class="sync-st" id="sync-st">⚪ Não conectado</div>
+  <button class="sb-sync" onclick="syncGS()">☁️ Testar conexão</button>
+</aside>
+
+<!-- ══ MAIN ════════════════════════════════════════════════ -->
+<main class="main">
+  <div class="topbar">
+    <div>
+      <div class="tp-title" id="tp-t">Dashboard</div>
+      <div class="tp-sub" id="tp-s">Unidade: <strong id="tp-unit">Matriz</strong></div>
+    </div>
+    <div class="tp-actions">
+      <button class="btn-s" onclick="exportCSV()">⬇ Exportar CSV</button>
+      <button class="btn-s" onclick="gerarRelatorioPDF()" style="background:#1D4ED8;color:#fff;border-color:#1D4ED8">📄 Relatório PDF</button>
+      <button class="btn-g" onclick="salvarSheets()">☁️ Enviar ao Sheets</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="notify ok" id="n-ok">✅ Operação realizada com sucesso!</div>
+    <div class="notify err" id="n-err">❌ Erro. Verifique os campos ou a URL do Apps Script.</div>
+    <div class="notify warn" id="n-warn">⚠️ Preencha os campos obrigatórios (*)</div>
+    <div class="notify info" id="n-info">ℹ️ Enviando dados ao Google Sheets...</div>
+
+    <!-- ── DASHBOARD ──────────────────────────────────────── -->
+    <div id="pg-dashboard" class="pg on">
+      <div id="dash-content"></div>
+    </div>
+
+    <!-- ── CADASTRAR OBRA ─────────────────────────────────── -->
+    <div id="pg-cadastrar" class="pg">
+      <div class="unit-header">
+        <div>
+          <div class="uh-name" id="uh-name-cad">Matriz</div>
+          <div class="uh-sub">Cadastrar nova obra nesta unidade</div>
+          <div class="uh-badges"><span class="bdg" style="background:rgba(255,255,255,.15);color:#fff">Unimed</span></div>
+        </div>
+        <div class="uh-stat">
+          <div class="uh-stat-v" id="uh-count-cad">0</div>
+          <div class="uh-stat-l">obras cadastradas</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sec-t">Nova obra <span>* campos obrigatórios</span></div>
+        <div class="form-g">
+          <div class="fld"><label>Nome da obra *</label><input type="text" id="c-nome" placeholder="Ex: Reforma da recepção"></div>
+          <div class="fld">
+            <label>Tipo de obra *</label>
+            <select id="c-tipo">
+              <option value="">Selecione...</option>
+              <option>Reforma geral</option><option>Instalações elétricas</option>
+              <option>Instalações hidráulicas</option><option>Adequação Regulatória</option>
+              <option>Expansão</option><option>Pintura</option><option>Ar-condicionado</option>
+              <option>Cobertura/Telhado</option><option>Pavimentação</option>
+              <option>Construção nova</option><option>Manutenção predial</option><option>Outro</option>
+            </select>
+          </div>
+          <div class="fld"><label>Responsável interno *</label><input type="text" id="c-resp" placeholder="Nome do responsável Unimed"></div>
+          <div class="fld"><label>Valor do contrato (R$)</label><input type="number" id="c-valor" placeholder="0,00" min="0"></div>
+          <div class="fld"><label>Área envolvida (m²)</label><input type="number" id="c-area" placeholder="0"></div>
+          <div class="fld">
+            <label>Prioridade</label>
+            <select id="c-prio"><option>Normal</option><option>Alta</option><option>Urgente</option><option>Baixa</option></select>
+          </div>
+          <div class="fld"><label>Data de início *</label><input type="date" id="c-inicio"></div>
+          <div class="fld"><label>Prazo previsto de conclusão *</label><input type="date" id="c-prazo"></div>
+          <div class="fld">
+            <label>Status inicial</label>
+            <select id="c-status"><option>Planejada</option><option>Em cotação</option><option>Aguardando aprovação</option><option>Em execução</option></select>
+          </div>
+          <div class="fld form-full"><label>Descrição / escopo da obra *</label><textarea id="c-desc" placeholder="Descreva o que será executado, materiais previstos, observações importantes..."></textarea></div>
+        </div>
+
+        <!-- PRESTADORES -->
+        <div style="margin-bottom:18px">
+          <div class="sec-t" style="margin-bottom:10px">Prestadores de serviço <span>Adicione um ou mais prestadores para esta obra</span></div>
+          <div id="prest-list-new" class="prest-list"></div>
+          <div id="prest-empty-msg" class="prest-empty">Nenhum prestador adicionado ainda. Clique abaixo para adicionar.</div>
+          <div class="add-prest-area" id="add-prest-area" style="display:none">
+            <div class="add-prest-title">➕ Novo prestador</div>
+            <div class="form-g3" style="margin-bottom:10px">
+              <div class="fld"><label>Nome / Empresa *</label><input type="text" id="np-nome" placeholder="Nome da empresa ou pessoa"></div>
+              <div class="fld"><label>CNPJ / CPF</label><input type="text" id="np-doc" placeholder="00.000.000/0001-00"></div>
+              <div class="fld"><label>Contato</label><input type="text" id="np-cont" placeholder="Telefone ou e-mail"></div>
+              <div class="fld"><label>Especialidade / Serviço</label><input type="text" id="np-serv" placeholder="Ex: Elétrica, Hidráulica"></div>
+              <div class="fld"><label>Valor do contrato (R$)</label><input type="number" id="np-val" placeholder="0,00" min="0"></div>
+              <div class="fld"><label>Responsável técnico</label><input type="text" id="np-rt" placeholder="Nome do RT"></div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn-sm-g" onclick="confirmarPrestador()">✅ Adicionar prestador</button>
+              <button class="btn-sm-s" onclick="cancelarPrestador()">Cancelar</button>
+            </div>
+          </div>
+          <button class="btn-s" style="margin-top:8px;font-size:12px" onclick="mostrarAddPrestador()">➕ Adicionar prestador</button>
+        </div>
+
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn-g" onclick="cadastrarObra()">✅ Cadastrar obra</button>
+          <button class="btn-s" onclick="limparCad()">🗑 Limpar campos</button>
+        </div>
+      </div>
+
+      <div class="card" id="card-obras-cad">
+        <div class="sec-t">Obras cadastradas — <span id="lbl-unit-obras">Matriz</span></div>
+        <div class="obras-list" id="lista-obras"></div>
+        <div id="empty-obras" style="text-align:center;padding:28px;color:var(--txt3)">
+          <div style="font-size:28px;margin-bottom:8px">📋</div>
+          <div style="font-size:13px">Nenhuma obra cadastrada para esta unidade ainda.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ACOMPANHAMENTO ──────────────────────────────────── -->
+    <div id="pg-atualizar" class="pg">
+      <div class="unit-header">
+        <div>
+          <div class="uh-name" id="uh-name-upd">Matriz</div>
+          <div class="uh-sub">Acompanhe e atualize o progresso das obras</div>
+        </div>
+        <div class="uh-stat">
+          <div class="uh-stat-v" id="uh-pct-upd">–</div>
+          <div class="uh-stat-l">progresso médio</div>
+        </div>
+      </div>
+      <div id="upd-empty-msg" style="display:none">
+        <div class="card" style="text-align:center;padding:36px;color:var(--txt3)">
+          <div style="font-size:32px;margin-bottom:10px">🔄</div>
+          <div>Cadastre obras primeiro na aba <strong>Cadastrar obra</strong>.</div>
+        </div>
+      </div>
+      <div id="acomp-lista"></div>
+    </div>
+
+    <!-- ── PORTAL PRESTADOR ──────────────────────────────────── -->
+
+    <!-- ── ORÇAMENTOS ──────────────────────────────────────── -->
+    <div id="pg-orcamentos" class="pg">
+      <div class="unit-header">
+        <div>
+          <div class="uh-name" id="uh-name-orc">Matriz</div>
+          <div class="uh-sub">Orçamentos organizados por obra e segmento</div>
+        </div>
+        <div class="uh-stat">
+          <div class="uh-stat-v" id="uh-orc-count">0</div>
+          <div class="uh-stat-l">orçamentos</div>
+        </div>
+      </div>
+
+      <!-- Formulário novo orçamento -->
+      <div class="card">
+        <div class="sec-t">Adicionar orçamento <span>* obrigatórios</span></div>
+        <div class="form-g3">
+          <div class="fld">
+            <label>Obra *</label>
+            <select id="orc-obra"><option value="">Selecione uma obra...</option></select>
+          </div>
+          <div class="fld">
+            <label>Segmento *</label>
+            <select id="orc-seg">
+              <option value="">Selecione ou crie...</option>
+              <option>Elétrica</option><option>Hidráulica</option><option>Alvenaria</option>
+              <option>Pintura</option><option>Ar-condicionado</option><option>Cobertura</option>
+              <option>Piso / Revestimento</option><option>Esquadrias</option>
+              <option>Fundação / Estrutura</option><option>Gesso / Drywall</option>
+              <option>Impermeabilização</option><option>Paisagismo</option>
+              <option>Automação / CFTV</option><option>Gases medicinais</option>
+              <option>Outro</option>
+            </select>
+          </div>
+          <div class="fld">
+            <label>Segmento personalizado</label>
+            <input type="text" id="orc-seg-custom" placeholder="Ou digite um segmento novo">
+          </div>
+          <div class="fld"><label>Empresa *</label><input type="text" id="orc-emp" placeholder="Nome da empresa"></div>
+          <div class="fld"><label>CNPJ</label><input type="text" id="orc-cnpj" placeholder="00.000.000/0001-00"></div>
+          <div class="fld"><label>Contato</label><input type="text" id="orc-cont" placeholder="Telefone ou e-mail"></div>
+          <div class="fld"><label>Valor proposto (R$) *</label><input type="number" id="orc-val" placeholder="0,00" min="0"></div>
+          <div class="fld"><label>Prazo de execução</label><input type="text" id="orc-prazo" placeholder="Ex: 30 dias"></div>
+          <div class="fld"><label>Garantia oferecida</label><input type="text" id="orc-gar" placeholder="Ex: 12 meses"></div>
+          <div class="fld form-full"><label>Observações técnicas</label><textarea id="orc-obs" placeholder="Escopo, condições, materiais inclusos..." style="min-height:60px"></textarea></div>
+        </div>
+        <div class="upload" onclick="document.getElementById('orc-file').click()" style="margin-bottom:16px">
+          <input type="file" id="orc-file" multiple accept=".pdf,.xlsx,.docx,.csv" onchange="anexarOrc(this)" style="display:none">
+          <span class="upload-ico">📎</span>
+          <p><strong>Clique para anexar</strong> o arquivo do orçamento</p>
+          <small>PDF, Excel, Word ou CSV aceitos</small>
+        </div>
+        <div id="orc-files-list" style="margin-bottom:12px;display:none"></div>
+        <div style="display:flex;gap:10px">
+          <button class="btn-g" onclick="addOrcamento()">+ Adicionar orçamento</button>
+          <button class="btn-s" onclick="limparOrc()">🗑 Limpar</button>
+        </div>
+      </div>
+
+      <!-- Lista por obra → segmento -->
+      <div id="orc-obras-lista"></div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+</div><!-- /app -->
+
+<!-- ══ MODAL EDITAR OBRA ══════════════════════════════════ -->
+<!-- MODAL EDITAR OBRA -->
+<div id="modal-obra-edit" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;padding:28px;max-width:620px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.15)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-size:16px;font-weight:700;color:var(--txt)">📝 Editar obra</div>
+      <button onclick="fecharModalEditarObra()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--txt3)">✕</button>
+    </div>
+    <input type="hidden" id="meo-id">
+    <div class="form-g">
+      <div class="fld form-full"><label>Nome da obra *</label><input type="text" id="meo-nome" placeholder="Nome da obra"></div>
+      <div class="fld">
+        <label>Tipo de obra</label>
+        <select id="meo-tipo">
+          <option value="">Selecione...</option>
+          <option>Reforma geral</option><option>Instalações elétricas</option>
+          <option>Instalações hidráulicas</option><option>Adequação Regulatória</option>
+          <option>Expansão</option><option>Pintura</option><option>Ar-condicionado</option>
+          <option>Cobertura/Telhado</option><option>Pavimentação</option>
+          <option>Construção nova</option><option>Manutenção predial</option><option>Outro</option>
+        </select>
+      </div>
+      <div class="fld"><label>Responsável interno</label><input type="text" id="meo-resp"></div>
+      <div class="fld"><label>Valor do contrato (R$)</label><input type="number" id="meo-valor" step="0.01"></div>
+      <div class="fld"><label>Área (m²)</label><input type="number" id="meo-area"></div>
+      <div class="fld">
+        <label>Prioridade</label>
+        <select id="meo-prio"><option>Normal</option><option>Alta</option><option>Urgente</option><option>Baixa</option></select>
+      </div>
+      <div class="fld"><label>Data de início</label><input type="date" id="meo-inicio"></div>
+      <div class="fld"><label>Prazo previsto</label><input type="date" id="meo-prazo"></div>
+      <div class="fld">
+        <label>Status</label>
+        <select id="meo-status">
+          <option>Planejada</option><option>Em cotação</option><option>Aguardando aprovação</option>
+          <option>Em execução</option><option>Paralisada</option><option>Concluída</option>
+        </select>
+      </div>
+      <div class="fld form-full"><label>Descrição / escopo</label><textarea id="meo-desc" style="min-height:80px"></textarea></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
+      <button class="btn-s" onclick="fecharModalEditarObra()">Cancelar</button>
+      <button class="btn-g" onclick="salvarModalEditarObra()">💾 Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL PRESTADOR -->
+<div id="modal-prest" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;padding:28px;max-width:520px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.15)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:16px;font-weight:700;color:var(--txt)" id="modal-prest-titulo">👷 Prestador</div>
+      <button onclick="fecharModalPrestador()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--txt3)">✕</button>
+    </div>
+    <div id="modal-prest-obra-lbl" style="font-size:13px;font-weight:600;color:var(--txt2);margin-bottom:16px;padding:8px 12px;background:var(--bg);border-radius:8px"></div>
+    <input type="hidden" id="mp-obra-id">
+    <input type="hidden" id="mp-prest-idx" value="-1">
+    <div class="form-g">
+      <div class="fld form-full"><label>Nome / Empresa *</label><input type="text" id="mp-nome" placeholder="Nome do prestador"></div>
+      <div class="fld"><label>CNPJ / CPF</label><input type="text" id="mp-doc" placeholder="00.000.000/0000-00"></div>
+      <div class="fld"><label>Contato</label><input type="text" id="mp-contato" placeholder="Telefone ou e-mail"></div>
+      <div class="fld"><label>Serviço / Especialidade</label><input type="text" id="mp-servico" placeholder="Ex: Elétrica, Pintura..."></div>
+      <div class="fld"><label>Valor do contrato</label><input type="number" id="mp-valor" placeholder="0,00" step="0.01"></div>
+      <div class="fld"><label>Responsável Técnico</label><input type="text" id="mp-rt" placeholder="Nome do RT"></div>
+      <div class="fld"><label>% Concluído</label><input type="number" id="mp-pct" min="0" max="100" value="0"></div>
+      <div class="fld form-full"><label>Observação</label><textarea id="mp-obs" style="min-height:60px" placeholder="Observações sobre o prestador..."></textarea></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:18px;justify-content:flex-end">
+      <button class="btn-s" onclick="fecharModalPrestador()">Cancelar</button>
+      <button class="btn-g" onclick="salvarModalPrestador()">💾 Salvar prestador</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-edit" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;padding:28px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.15)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+      <div style="font-size:16px;font-weight:700;color:var(--txt)">✏️ Editar andamento da obra</div>
+      <button onclick="fecharModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--txt3)">✕</button>
+    </div>
+    <div id="modal-obra-nome" style="font-size:14px;font-weight:600;color:var(--txt2);margin-bottom:18px;padding:10px 14px;background:var(--bg);border-radius:8px"></div>
+    <div class="form-g" style="margin-bottom:14px">
+      <div class="fld">
+        <label>% Concluído</label>
+        <input type="number" id="edit-pct" min="0" max="100" class="pct-input" style="text-align:left">
+      </div>
+      <div class="fld">
+        <label>Status atual</label>
+        <select id="edit-status" style="font-size:13px;border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--txt)">
+          <option>Em execução</option><option>Planejada</option><option>Em Cotação</option>
+          <option>Aguardando aprovação</option><option>Concluída</option><option>Paralisada</option>
+        </select>
+      </div>
+      <div class="fld form-full">
+        <label>O que está sendo feito agora?</label>
+        <input type="text" id="edit-atividade" placeholder="Ex: Execução da fundação, pintura do corredor...">
+      </div>
+    </div>
+    <div style="background:var(--bg);border-radius:10px;padding:14px;margin-bottom:16px">
+      <div style="font-size:12px;font-weight:700;color:var(--txt);margin-bottom:10px">📋 Registrar ocorrência</div>
+      <div class="form-g" style="margin-bottom:10px">
+        <div class="fld"><label>Data</label><input type="date" id="edit-dt"></div>
+        <div class="fld">
+          <label>Tipo</label>
+          <select id="edit-tp" style="font-size:13px;border:1px solid var(--border2);border-radius:8px;padding:9px 12px;color:var(--txt)">
+            <option>Atualização geral</option><option>Pendência</option><option>Intercorrência</option>
+            <option>Vistoria</option><option>Entrega parcial</option><option>Paralisação</option><option>Retomada</option>
+          </select>
+        </div>
+        <div class="fld form-full"><label>Descrição</label><textarea id="edit-oc" placeholder="Descreva o andamento, pendências, intercorrências..." style="min-height:70px"></textarea></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn-s" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-g" onclick="salvarEdicaoObra()">💾 Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── ESTADO ───────────────────────────────────────────────────────
+var state = {
+  unit: 'Matriz',
+  menu: 'dashboard',
+  obras: { 'Matriz':[], 'Campo Novo Parecis':[], 'Sapezal':[], 'Barra do Bugres':[], 'Oncologia':[], 'CMU':[] },
+  orcs:  { 'Matriz':[], 'Campo Novo Parecis':[], 'Sapezal':[], 'Barra do Bugres':[], 'Oncologia':[], 'CMU':[] }
+};
+
+// Lê URL salva pelo usuário; usa a padrão só se não houver nenhuma salva
+var _URL_PADRAO = 'https://script.google.com/macros/s/AKfycbyNNNGVSYjfPfP0UPVTG1eOy7nSgMVxJDkI3Na5-z-TLjn-FZQ4L1JrkLyWnOjDaIkvyA/exec';
+var _storedUrl = localStorage.getItem('gs-url');
+var SCRIPT_URL = (_storedUrl && _storedUrl.indexOf('script.google.com') >= 0) ? _storedUrl : _URL_PADRAO;
+// Garante que localStorage sempre tem a URL correta
+localStorage.setItem('gs-url', SCRIPT_URL);
+
+// Cache local como fallback offline
+try {
+  var _cache = localStorage.getItem('unimed-obras-v2');
+  if(_cache){ var _cp = JSON.parse(_cache); state.obras = _cp.obras||state.obras; state.orcs = _cp.orcs||state.orcs; }
+} catch(e){}
+
+var prestadoresTemp = [];
+var modalObraId = null;
+
+// ── AUTOSAVE (salva 3s após parar de digitar) ─────────────────────
+var _autoSaveTimers = {};
+function autoSavePrestador(obraId, prestIdx){
+  var key = obraId+'-'+prestIdx;
+  clearTimeout(_autoSaveTimers[key]);
+  // Indicador visual
+  var btn = document.querySelector('[onclick="salvarProgressoPrestador('+obraId+', '+prestIdx+')"]');
+  if(btn){ btn.textContent = '⏳ Salvando...'; btn.disabled = true; }
+  _autoSaveTimers[key] = setTimeout(function(){
+    salvarProgressoPrestador(obraId, prestIdx, true);
+  }, 3000);
+}
+
+function saveLocal(){
+  try{ localStorage.setItem('unimed-obras-v2', JSON.stringify({obras:state.obras, orcs:state.orcs})); }catch(e){}
+}
+
+var _syncPausadoAte = 0;
+function pausarSync(ms){ _syncPausadoAte = Date.now() + (ms||8000); }
+
+// ── Comunicação com Google Apps Script ───────────────────────────
+// Usa fetch() normal — o Apps Script retorna CORS correto quando
+// implantado como "Qualquer pessoa". JSONP como fallback automático.
+var _jsonpCallbacks = {};
+
+function gsFetch(url, params, cb){
+  var sep = url.indexOf('?') >= 0 ? '&' : '?';
+  var qs  = Object.keys(params).map(function(k){
+    return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
+  }).join('&');
+  var fullUrl = url + sep + qs;
+
+  // Tenta fetch normal primeiro
+  fetch(fullUrl)
+    .then(function(r){
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(data){ cb(null, data); })
+    .catch(function(){
+      // Fallback: JSONP (para file:// ou bloqueio de CORS)
+      var cbName = '__gs_' + Date.now() + '_' + Math.floor(Math.random()*1e5);
+      var timer;
+      window[cbName] = function(data){
+        clearTimeout(timer);
+        window[cbName] = null;
+        var s = document.getElementById(cbName);
+        if(s && s.parentNode) s.parentNode.removeChild(s);
+        cb(null, data);
+      };
+      var s = document.createElement('script');
+      s.id = cbName;
+      s.src = fullUrl + '&callback=' + cbName;
+      s.onerror = function(){
+        clearTimeout(timer);
+        window[cbName] = null;
+        if(s.parentNode) s.parentNode.removeChild(s);
+        cb(new Error('falhou'), null);
+      };
+      timer = setTimeout(function(){ s.onerror && s.onerror(); }, 15000);
+      document.head.appendChild(s);
+    });
+}
+
+function strData(v){
+  if(!v || v==='undefined' || v==='null') return '';
+  var s = String(v).trim();
+  if(!s) return '';
+  // ISO ou yyyy-mm-dd
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)) return new Date(s.slice(0,10)+'T12:00:00').toLocaleDateString('pt-BR');
+  // Já dd/mm/yyyy
+  if(/^\d{2}\/\d{2}\/\d{4}/.test(s)) return s.slice(0,10);
+  // Número serial Excel/Sheets
+  if(/^\d{5}$/.test(s)){
+    var base = new Date(1899,11,30); base.setDate(base.getDate()+parseInt(s));
+    return base.toLocaleDateString('pt-BR');
+  }
+  return s;
+}
+
+function sanitizarOrcs(orcsRaw){
+  Object.keys(orcsRaw).forEach(function(u){
+    // Deduplica em memória: mantém por ID único, preferindo o que tem link do Drive
+    var seen = {};
+    var dedup = [];
+    (orcsRaw[u]||[]).forEach(function(o){
+      var key = String(o.id||'').trim() ||
+        (String(o.unidade||'').trim()+'|'+String(o.obra||'').trim()+'|'+String(o.segmento||'').trim()+'|'+String(o.empresa||'').trim());
+      if(!key || key==='|||') { dedup.push(o); return; }
+      if(seen[key] === undefined){
+        seen[key] = dedup.length;
+        dedup.push(o);
+      } else {
+        // Prefere o que tem link do Drive
+        var temLink = String(o.arquivos||'').indexOf('drive.google.com') >= 0 ||
+                      (Array.isArray(o.arquivosLinks) && o.arquivosLinks.length);
+        var existTemLink = String(dedup[seen[key]].arquivos||'').indexOf('drive.google.com') >= 0 ||
+                           (Array.isArray(dedup[seen[key]].arquivosLinks) && dedup[seen[key]].arquivosLinks.length);
+        if(temLink && !existTemLink) dedup[seen[key]] = o;
+      }
+    });
+    orcsRaw[u] = dedup;
+    dedup.forEach(function(o){
+      o.data    = strData(o.data);
+      o.id      = String(o.id);
+      o.empresa = String(o.empresa||'');
+      o.obra    = String(o.obra||'');
+      // Normaliza arquivos: "nome: url\nnome2: url2"
+      if(!Array.isArray(o.arquivosLinks) || !o.arquivosLinks.length){
+        var arqStr = String(o.arquivos||'');
+        if(arqStr.indexOf('drive.google.com') >= 0){
+          // Formato "nome: url"
+          o.arquivosLinks = arqStr.split('\n').filter(Boolean).map(function(l){
+            var idx = l.indexOf(': http');
+            return idx>=0 ? {nome:l.slice(0,idx).trim(), url:l.slice(idx+2).trim()} : null;
+          }).filter(Boolean);
+          o.arquivos = o.arquivosLinks.map(function(l){ return l.nome; });
+        } else if(arqStr && arqStr !== '[]' && arqStr !== '""'){
+          // Só nomes, sem link
+          var nomes = arqStr.replace(/[\[\]"\\]/g,'').split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+          o.arquivos = nomes;
+          o.arquivosLinks = [];
+        } else {
+          o.arquivos = [];
+          o.arquivosLinks = [];
+        }
+      } else {
+        // Já é array — garante que arquivos tem os nomes
+        o.arquivos = o.arquivosLinks.map(function(l){ return l.nome||''; });
+      }
+    });
+  });
+  return orcsRaw;
+}
+
+// Sanitiza obras vindas do servidor (converte campos que podem chegar como Date)
+function sanitizarObras(obrasRaw){
+  Object.keys(obrasRaw).forEach(function(u){
+    (obrasRaw[u]||[]).forEach(function(o){
+      o.inicio    = strData(o.inicio);
+      o.prazo     = strData(o.prazo);
+      o.atividade = String(o.atividade||'');
+      o.pct       = parseFloat(o.pct)||0;
+      (o.prestadores||[]).forEach(function(p){
+        p.atividade          = String(p.atividade||'');
+        p.ultimaAtualizacao  = strData(p.ultimaAtualizacao);
+        p.pct                = parseFloat(p.pct)||0;
+      });
+    });
+  });
+  return obrasRaw;
+}
+
+function carregarDoSheets(cb){
+  if(!SCRIPT_URL){ if(cb) cb(false); return; }
+  if(Date.now() < _syncPausadoAte){ if(cb) cb(false); return; }
+  if(_filaReenvio.length > 0){ if(cb) cb(false); return; } // aguarda fila esvaziar
+  setSyncStatus('⏳ Sincronizando...');
+  gsFetch(SCRIPT_URL, {tipo:'carregar', ts:Date.now()}, function(err, data){
+    if(err || !data){
+      setSyncStatus('🔴 Offline — usando cache local');
+      if(cb) cb(false);
+      return;
+    }
+    if(Date.now() < _syncPausadoAte){ if(cb) cb(false); return; }
+    if(data && data.obras){
+      // MERGE: preserva dados locais (prestadores, ocorrências) que podem não ter ido ao Sheets ainda
+      mergeEstadoRemoto(sanitizarObras(data.obras), sanitizarOrcs(data.orcs || {}));
+      saveLocal();
+      setSyncStatus('🟢 Sincronizado · ' + new Date().toLocaleTimeString('pt-BR'));
+      // Renderiza só a aba atual para não fechar cards abertos
+      if(state.menu === 'atualizar') renderAcompanhamento();
+      else if(state.menu === 'orcamentos') renderOrcamentos();
+      else renderPage();
+    } else {
+      setSyncStatus('⚠️ Conectado mas sem dados ainda');
+    }
+    if(cb) cb(true);
+  });
+}
+
+function setSyncStatus(txt){
+  var el=document.getElementById('sync-st'); if(el) el.textContent=txt;
+}
+
+// ── MERGE: integra dados remotos sem destruir estado local não sincronizado ──
+function mergeEstadoRemoto(obrasRemote, orcsRemote){
+  // OBRAS: para cada unidade remota, faz merge campo a campo
+  Object.keys(obrasRemote).forEach(function(u){
+    if(!state.obras[u]) state.obras[u] = [];
+    var remotas = obrasRemote[u]||[];
+    remotas.forEach(function(obraRemota){
+      var local = state.obras[u].find(function(o){ return String(o.id)===String(obraRemota.id) || o.nome===obraRemota.nome; });
+      if(local){
+        // Preserva campos locais críticos: prestadores, ocorrências (podem ter dado local mais recente)
+        var prestLocal = local.prestadores||[];
+        var ocLocal    = local.ocorrencias||[];
+        // Atualiza campos vindos do servidor (status, pct, atividade, etc)
+        Object.assign(local, obraRemota);
+        // Se o servidor não retornou prestadores (array vazio), preserva os locais
+        if(!(obraRemota.prestadores&&obraRemota.prestadores.length) && prestLocal.length){
+          local.prestadores = prestLocal;
+        } else if(obraRemota.prestadores&&obraRemota.prestadores.length){
+          // Merge de prestadores: servidor é base, mas preserva campos locais mais recentes
+          var merged = obraRemota.prestadores.map(function(pr){
+            var localPr = prestLocal.find(function(pl){ return pl.nome===pr.nome; });
+            if(!localPr) return pr;
+            // Preserva atividade local se servidor ainda não tem
+            if(localPr.atividade && !pr.atividade) pr.atividade = localPr.atividade;
+            // Preserva ocorrências locais se tiver mais que o servidor
+            if((localPr.ocorrencias||[]).length > (pr.ocorrencias||[]).length)
+              pr.ocorrencias = localPr.ocorrencias;
+            // Preserva pct local se for maior (evita regressão)
+            if((localPr.pct||0) > (pr.pct||0)) pr.pct = localPr.pct;
+            return pr;
+          });
+          // Adiciona prestadores locais que o servidor ainda não conhece
+          prestLocal.forEach(function(pl){
+            var existe = merged.find(function(pr){ return pr.nome===pl.nome; });
+            if(!existe) merged.push(pl);
+          });
+          local.prestadores = merged;
+        }
+        // Preserva ocorrências locais que ainda não foram ao Sheets
+        if(ocLocal.length > (local.ocorrencias||[]).length){
+          local.ocorrencias = ocLocal;
+        }
+      } else {
+        // Nova obra que veio do servidor
+        obraRemota.prestadores = obraRemota.prestadores||[];
+        obraRemota.ocorrencias = obraRemota.ocorrencias||[];
+        state.obras[u].push(obraRemota);
+      }
+    });
+  });
+  // Adiciona unidades que existem no servidor mas não localmente
+  Object.keys(obrasRemote).forEach(function(u){
+    if(!state.obras[u]) state.obras[u] = obrasRemote[u]||[];
+  });
+
+  // ORÇAMENTOS: substitui normalmente (são sincronizados com ID único)
+  // mas preserva orçamentos locais recentes (com id numérico alto = criados localmente)
+  Object.keys(orcsRemote).forEach(function(u){
+    var remotosIds = (orcsRemote[u]||[]).map(function(o){ return String(o.id); });
+    var soLocal = (state.orcs[u]||[]).filter(function(o){
+      return !remotosIds.includes(String(o.id));
+    });
+    state.orcs[u] = (orcsRemote[u]||[]).concat(soLocal);
+  });
+  Object.keys(state.orcs).forEach(function(u){
+    if(!orcsRemote[u]) return; // mantém locais se unidade não veio do servidor
+  });
+}
+
+// ── NAVEGAÇÃO ────────────────────────────────────────────────────
+var menuTitles = { dashboard:'Dashboard', cadastrar:'Cadastrar obra', atualizar:'Acompanhamento', orcamentos:'Orçamentos' };
+function navMenu(pg, el){
+  state.menu = pg;
+  document.querySelectorAll('.pg').forEach(function(x){ x.classList.remove('on'); });
+  document.getElementById('pg-'+pg).classList.add('on');
+  document.querySelectorAll('.nav-item').forEach(function(x){ x.classList.remove('on'); });
+  if(el) el.classList.add('on');
+  document.getElementById('tp-t').textContent = menuTitles[pg]||pg;
+  renderPage();
+}
+
+function selUnit(nome, el){
+  state.unit = nome;
+  document.querySelectorAll('.unit-item').forEach(function(x){ x.classList.remove('on'); });
+  if(el) el.classList.add('on');
+  document.getElementById('tp-unit').textContent = nome;
+  renderPage();
+}
+
+function renderPage(){
+  var u = state.unit;
+  ['cad','upd','orc','prest'].forEach(function(k){
+    var el = document.getElementById('uh-name-'+k); if(el) el.textContent = u;
+  });
+  var lbl = document.getElementById('lbl-unit-obras'); if(lbl) lbl.textContent = u;
+  var cc = document.getElementById('uh-count-cad'); if(cc) cc.textContent = (state.obras[u]||[]).length;
+  if(state.menu === 'dashboard') renderDashboard();
+  if(state.menu === 'cadastrar') renderObras();
+  if(state.menu === 'atualizar') renderAcompanhamento();
+  if(state.menu === 'orcamentos') renderOrcamentos();
+  atualizarSelects();
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────
+function fmtData(d){
+  if(!d || d==='undefined' || d==='null') return '—';
+  var s = String(d).trim();
+  if(!s) return '—';
+  // Já está em dd/mm/yyyy
+  if(/^\d{2}\/\d{2}\/\d{4}/.test(s)) return s.slice(0,10);
+  // yyyy-mm-dd ou ISO
+  if(/^\d{4}-\d{2}-\d{2}/.test(s)){
+    var p = s.slice(0,10).split('-');
+    return p[2]+'/'+p[1]+'/'+p[0];
+  }
+  // Número serial do Excel/Sheets
+  if(/^\d{5}$/.test(s)){
+    var base = new Date(1899,11,30);
+    base.setDate(base.getDate()+parseInt(s));
+    return base.toLocaleDateString('pt-BR');
+  }
+  return s.slice(0,10);
+}
+function fmtVal(v){
+  if(!v) return 'R$ 0';
+  return 'R$ '+Number(v).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function fmtValCompact(v){
+  if(!v) return '—';
+  if(v>=1000000) return 'R$ '+(v/1000000).toFixed(1)+'M';
+  if(v>=1000) return 'R$ '+(v/1000).toFixed(0)+'K';
+  return 'R$ '+v.toLocaleString('pt-BR');
+}
+function badgeCls(status){
+  return {'Em execução':'bdg-g','Planejada':'bdg-gray','Em licitação':'bdg-b','Aguardando aprovação':'bdg-o','Concluída':'bdg-teal','Paralisada':'bdg-r'}[status]||'bdg-gray';
+}
+function prioCls(p){
+  return {'Urgente':'bdg-r','Alta':'bdg-o','Normal':'bdg-gray','Baixa':'bdg-p'}[p]||'bdg-gray';
+}
+
+// ── CUSTO TOTAL DA OBRA ──────────────────────────────────────────
+// Função central de % da obra — usa média dos prestadores se existirem
+function pctObra(o){
+  var ps = o.prestadores||[];
+  if(ps.length) return Math.round(ps.reduce(function(a,p){ return a+(p.pct||0); },0)/ps.length);
+  return o.pct||0;
+}
+
+function custoTotalObra(obra){
+  var contrato = parseFloat(obra.valor)||0;
+  var prestadores = (obra.prestadores||[]).reduce(function(a,p){ return a+(parseFloat(p.valor)||0); },0);
+  // Total = soma dos prestadores (o contrato é o valor original, não some ao custo executado)
+  return { contrato:contrato, prestadores:prestadores, total:prestadores };
+}
+
+// ── DASHBOARD ────────────────────────────────────────────────────
+var _dashFiltro = 'todos'; // todos | andamento | concluidas | prestadores | obra:NOME
+
+function setDashFiltro(f){
+  _dashFiltro = f;
+  renderDashboard();
+}
+
+function renderDashboard(){
+  var obrasUnit = state.obras[state.unit]||[];
+  var totalObras   = obrasUnit.length;
+  var emExecucao   = obrasUnit.filter(function(o){ return o.status==='Em execução'; }).length;
+  var concluidas   = obrasUnit.filter(function(o){ return o.status==='Concluída'; }).length;
+  var pctMedio = totalObras ? Math.round(obrasUnit.reduce(function(a,o){ return a+pctObra(o); },0)/totalObras) : 0;
+  var totalPrest   = obrasUnit.reduce(function(a,o){ return a+(o.prestadores||[]).length; },0);
+  var custoContrato  = obrasUnit.reduce(function(a,o){ return a+(parseFloat(o.valor)||0); },0);
+  var custoPrest     = obrasUnit.reduce(function(a,o){ return a+(o.prestadores||[]).reduce(function(b,p){ return b+(parseFloat(p.valor)||0); },0); },0);
+  var custoUnitTotal = custoPrest; // total = soma dos prestadores (contrato é referência separada)
+  var statusColors   = {'Em execução':'#00843D','Concluída':'#0F766E','Planejada':'#6B7280','Em licitação':'#1D4ED8','Aguardando aprovação':'#D97706','Paralisada':'#DC2626'};
+
+  var html = '';
+
+  // ── Banner custo total ──────────────────────────────────────────
+  html += `<div class="custo-total-card">
+    <div class="ct-label">Custo total geral — ${state.unit}</div>
+    <div class="ct-val">${fmtVal(custoUnitTotal)}</div>
+    <div class="ct-grid">
+      <div class="ct-item"><div class="ct-item-lbl">Contratos de obra</div><div class="ct-item-val">${fmtValCompact(custoContrato)}</div></div>
+      <div class="ct-item"><div class="ct-item-lbl">Prestadores</div><div class="ct-item-val">${fmtValCompact(custoPrest)}</div></div>
+      <div class="ct-item"><div class="ct-item-lbl">Obras ativas</div><div class="ct-item-val">${totalObras}</div></div>
+    </div>
+  </div>`;
+
+  // ── KPIs clicáveis ──────────────────────────────────────────────
+  function kpiAct(f){ return _dashFiltro===f ? 'kpi-card kpi-active' : 'kpi-card'; }
+  html += `<div class="dash-grid">
+    <div class="${kpiAct('todos')}" onclick="setDashFiltro('todos')" title="Ver todas as obras">
+      <div class="kpi-icon">📋</div><div class="kpi-val">${totalObras}</div>
+      <div class="kpi-lbl">Total de obras</div>
+      <div class="kpi-sub">${emExecucao} em execução</div>
+      <div class="kpi-hint">clique para ver todas</div>
+    </div>
+    <div class="${kpiAct('andamento')}" onclick="setDashFiltro('andamento')" title="Ver obras em andamento">
+      <div class="kpi-icon">🔄</div><div class="kpi-val">${emExecucao}</div>
+      <div class="kpi-lbl">Obras em andamento</div>
+      <div class="kpi-sub">${totalObras&&emExecucao?Math.round(emExecucao/totalObras*100):0}% do total</div>
+      <div class="kpi-hint">clique para filtrar</div>
+    </div>
+    <div class="${kpiAct('concluidas')}" onclick="setDashFiltro('concluidas')" title="Ver obras concluídas">
+      <div class="kpi-icon">✅</div><div class="kpi-val">${concluidas}</div>
+      <div class="kpi-lbl">Obras concluídas</div>
+      <div class="kpi-sub">${totalObras?Math.round(concluidas/totalObras*100):0}% do total</div>
+      <div class="kpi-hint">clique para filtrar</div>
+    </div>
+    <div class="${kpiAct('prestadores')}" onclick="setDashFiltro('prestadores')" title="Ver todos os prestadores">
+      <div class="kpi-icon">👷</div><div class="kpi-val">${totalPrest}</div>
+      <div class="kpi-lbl">Prestadores vinculados</div>
+      <div class="kpi-sub">em ${totalObras} obras</div>
+      <div class="kpi-hint">clique para ver todos</div>
+    </div>
+    <div class="${kpiAct('pct')}" onclick="setDashFiltro('pct')" title="Ver progresso geral">
+      <div class="kpi-icon">📊</div><div class="kpi-val">${pctMedio}%</div>
+      <div class="kpi-lbl">Progresso médio</div>
+      <div class="kpi-sub">todas as obras</div>
+      <div class="kpi-hint">clique para ver ranking</div>
+    </div>
+  </div>`;
+
+  // ── Filtros rápidos por obra ────────────────────────────────────
+  if(totalObras > 0){
+    html += `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+      <span style="font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em">Filtrar:</span>
+      <button class="dash-filtro-btn${_dashFiltro==='todos'?' on':''}" onclick="setDashFiltro('todos')">Todas</button>
+      <button class="dash-filtro-btn${_dashFiltro==='andamento'?' on':''}" onclick="setDashFiltro('andamento')">Em andamento</button>
+      <button class="dash-filtro-btn${_dashFiltro==='concluidas'?' on':''}" onclick="setDashFiltro('concluidas')">Concluídas</button>
+      <button class="dash-filtro-btn${_dashFiltro==='prestadores'?' on':''}" onclick="setDashFiltro('prestadores')">Por prestador</button>
+      ${obrasUnit.map(function(o){
+        var key = 'obra:'+o.nome;
+        var btnCls = 'dash-filtro-btn' + (_dashFiltro===key ? ' on' : '');
+        return '<button class="' + btnCls + '" onclick="setDashFiltro(\'' + key.split("'").join('') + '\')">&#x1F4CB; ' + o.nome + '</button>';
+      }).join('')}
+    </div>`;
+  }
+
+  // ── Vista: Ranking por progresso ──────────────────────────────
+  if(_dashFiltro === 'pct'){
+    var sorted_pct = obrasUnit.slice().sort(function(a,b){ return (b.pct||0)-(a.pct||0); });
+    html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <div style="font-size:13px;font-weight:700;color:var(--txt)">📊 Ranking de progresso — ${state.unit}</div>
+      <button class="dash-filtro-btn on" onclick="setDashFiltro('todos')" style="margin-left:auto">← Voltar</button>
+    </div>`;
+    if(!sorted_pct.length){
+      html += `<div class="card" style="text-align:center;padding:30px;color:var(--txt3)">Nenhuma obra cadastrada.</div>`;
+    } else {
+      html += `<div class="card"><div style="display:flex;flex-direction:column;gap:10px">`;
+      sorted_pct.forEach(function(o, idx){
+        var pct = pctObra(o);
+        var cor = pct>=75?'var(--g)':pct>=40?'var(--warn)':'var(--info)';
+        var medal = idx===0?'🥇':idx===1?'🥈':idx===2?'🥉':'';
+        html += `<div onclick="setDashFiltro('obra:${o.nome.replace(/'/g,"\'")}')
+" style="cursor:pointer;padding:10px 12px;background:var(--bg);border-radius:9px;transition:background .15s" onmouseover="this.style.background='var(--gl)'" onmouseout="this.style.background='var(--bg)'">
+          <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+            <span style="font-size:16px;width:24px">${medal||'#'+(idx+1)}</span>
+            <div style="flex:1">
+              <div style="font-size:13px;font-weight:600;color:var(--txt)">${o.nome}</div>
+              <div style="font-size:11px;color:var(--txt3)">${o.tipo} · <span class="bdg ${badgeCls(o.status)}">${o.status}</span></div>
+            </div>
+            <div style="font-size:18px;font-weight:700;color:${cor}">${pct}%</div>
+          </div>
+          <div class="pbar-lg"><div class="pfill-lg" style="width:${pct}%;background:${cor}"></div></div>
+        </div>`;
+      });
+      html += `</div></div>`;
+    }
+    document.getElementById('dash-content').innerHTML = html;
+    return;
+  }
+
+  // ── Vista: Por Prestador ────────────────────────────────────────
+  if(_dashFiltro === 'prestadores'){
+    var todosPrests = [];
+    obrasUnit.forEach(function(o){
+      (o.prestadores||[]).forEach(function(p){
+        todosPrests.push(Object.assign({},p,{obraNome:o.nome,obraStatus:o.status}));
+      });
+    });
+    if(!todosPrests.length){
+      html += `<div class="card" style="text-align:center;padding:30px;color:var(--txt3)">Nenhum prestador vinculado ainda.</div>`;
+    } else {
+      html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+        <div style="font-size:13px;font-weight:700;color:var(--txt)">👷 Todos os prestadores — ${state.unit}</div>
+        <button class="dash-filtro-btn on" onclick="setDashFiltro('todos')" style="margin-left:auto">← Voltar</button>
+      </div>`;
+      html += `<div class="dash-obras-grid">`;
+      todosPrests.forEach(function(p){
+        var pct = p.pct||0;
+        var cor = pct>=75?'var(--g)':pct>=40?'var(--warn)':'var(--info)';
+        html += `<div class="dash-obra-card" onclick="setDashFiltro('obra:${p.obraNome.replace(/'/g,"\\'")}')">
+          <div class="dash-obra-top">
+            <div>
+              <div class="dash-obra-nome">${p.nome}</div>
+              <div class="dash-obra-unit">${p.servico||'—'} · Obra: ${p.obraNome}</div>
+              ${p.atividade?`<div style="font-size:11px;color:var(--g);margin-top:4px;font-weight:600">▶ ${p.atividade}</div>`:''}
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div class="dash-obra-pct-big">${pct}%</div>
+              <div class="dash-obra-pct-lbl">concluído</div>
+            </div>
+          </div>
+          <div class="pbar-lg"><div class="pfill-lg" style="width:${pct}%;background:${cor}"></div></div>
+          <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap;font-size:11px;color:var(--txt3)">
+            ${p.contato?`<span>📞 ${p.contato}</span>`:''}
+            ${p.valor?`<span>💰 ${fmtVal(p.valor)}</span>`:''}
+            ${p.ultimaAtualizacao?`<span>🕐 ${p.ultimaAtualizacao}</span>`:''}
+          </div>
+          ${(p.ocorrencias||[]).length?`<div style="margin-top:8px;font-size:11px;color:var(--txt2);background:var(--bg);border-radius:7px;padding:6px 10px">
+            📝 ${p.ocorrencias[p.ocorrencias.length-1]}
+          </div>`:''}
+        </div>`;
+      });
+      html += `</div>`;
+    }
+    document.getElementById('dash-content').innerHTML = html;
+    return;
+  }
+
+  // ── Vista: obra específica ──────────────────────────────────────
+  if(_dashFiltro.indexOf('obra:') === 0){
+    var obraNomeFiltro = _dashFiltro.slice(5);
+    var obraDetalhe = obrasUnit.find(function(o){ return o.nome === obraNomeFiltro; });
+    if(obraDetalhe){
+      var custo = custoTotalObra(obraDetalhe);
+      var nPrest = (obraDetalhe.prestadores||[]).length;
+      var logs = (obraDetalhe.ocorrencias||[]).slice().reverse();
+      html += `<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="font-size:13px;font-weight:700;color:var(--txt)">📋 Detalhes da obra</div>
+        <button class="dash-filtro-btn on" onclick="setDashFiltro('todos')" style="margin-left:auto">← Voltar</button>
+      </div>
+      <div class="card">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px">
+          <div>
+            <div style="font-size:18px;font-weight:700;color:var(--txt)">${obraDetalhe.nome}</div>
+            <div style="font-size:12px;color:var(--txt3);margin-top:2px">${obraDetalhe.tipo} · Resp: ${obraDetalhe.responsavel}</div>
+            <div style="margin-top:6px;display:flex;gap:6px">
+              <span class="bdg ${badgeCls(obraDetalhe.status)}">${obraDetalhe.status}</span>
+              <span class="bdg ${prioCls(obraDetalhe.prioridade)}">${obraDetalhe.prioridade}</span>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:28px;font-weight:700;color:var(--g)">${obraDetalhe.pct||0}%</div>
+            <div style="font-size:11px;color:var(--txt3)">concluído</div>
+          </div>
+        </div>
+        <div class="pbar-lg" style="margin-bottom:14px"><div class="pfill-lg" style="width:${obraDetalhe.pct||0}%;background:${(obraDetalhe.pct||0)>=75?'var(--g)':(obraDetalhe.pct||0)>=40?'var(--warn)':'var(--info)'}"></div></div>
+        ${obraDetalhe.atividade?`<div style="font-size:12px;color:var(--g);font-weight:600;margin-bottom:10px">▶ ${obraDetalhe.atividade}</div>`:''}
+        <div class="dash-custo-box">
+          <div style="font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;margin-bottom:6px">💰 Custos</div>
+          ${custo.contrato?`<div class="dash-custo-row"><span class="dash-custo-lbl">Contrato principal</span><span class="dash-custo-val">${fmtVal(custo.contrato)}</span></div>`:''}
+          ${custo.prestadores?`<div class="dash-custo-row"><span class="dash-custo-lbl">Prestadores (${nPrest})</span><span class="dash-custo-val">${fmtVal(custo.prestadores)}</span></div>`:''}
+          ${custo.orcamentos?`<div class="dash-custo-row"><span class="dash-custo-lbl">Orçamentos aprovados</span><span class="dash-custo-val">${fmtVal(custo.orcamentos)}</span></div>`:''}
+          <div class="dash-custo-row-total"><span>Total</span><span>${fmtVal(custo.total)}</span></div>
+        </div>
+        <div style="font-size:11px;color:var(--txt3);margin:10px 0">📅 ${fmtData(obraDetalhe.inicio)} → ${fmtData(obraDetalhe.prazo)} · Área: ${obraDetalhe.area||'—'}</div>
+        ${nPrest?`<div style="margin-top:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--txt);margin-bottom:8px">👷 Prestadores (${nPrest})</div>
+          ${obraDetalhe.prestadores.map(function(p){
+            var pct=p.pct||0;
+            return `<div style="background:var(--bg);border-radius:9px;padding:10px 14px;margin-bottom:8px">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--txt)">${p.nome}</div>
+                  <div style="font-size:11px;color:var(--txt3)">${p.servico||'—'} ${p.valor?'· '+fmtVal(p.valor):''}</div>
+                  ${p.atividade?`<div style="font-size:11px;color:var(--g);font-weight:600;margin-top:2px">▶ ${p.atividade}</div>`:''}
+                </div>
+                <div style="font-size:16px;font-weight:700;color:var(--g)">${pct}%</div>
+              </div>
+              <div class="pbar-lg" style="margin-top:6px"><div class="pfill-lg" style="width:${pct}%;background:${pct>=75?'var(--g)':pct>=40?'var(--warn)':'var(--info)'}"></div></div>
+            </div>`;
+          }).join('')}
+        </div>`:''}
+        ${logs.length?`<div style="margin-top:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--txt);margin-bottom:8px">📜 Histórico (${logs.length})</div>
+          ${logs.slice(0,5).map(function(oc){
+            var partes=oc.split('|'); var txt=partes[2]||oc; var data=partes[0]||'';
+            return `<div class="log-entry"><div class="log-dot"></div><div><div class="log-txt">${txt}</div>${data?'<div class="log-data">'+data+'</div>':''}</div></div>`;
+          }).join('')}
+        </div>`:''}
+      </div>`;
+    }
+    document.getElementById('dash-content').innerHTML = html;
+    return;
+  }
+
+  // ── Vista: lista de obras (todos / andamento / concluidas) ──────
+  var obrasFiltradas = obrasUnit.filter(function(o){
+    if(_dashFiltro === 'andamento')  return o.status !== 'Concluída';
+    if(_dashFiltro === 'concluidas') return o.status === 'Concluída';
+    return true;
+  });
+
+  // Distribuição de status
+  var statusCounts = {};
+  obrasUnit.forEach(function(o){ statusCounts[o.status]=(statusCounts[o.status]||0)+1; });
+  if(totalObras > 0 && _dashFiltro === 'todos'){
+    html += `<div class="card" style="margin-bottom:16px">
+      <div class="sec-t">Distribuição por status</div>
+      <div class="status-dist">
+        ${Object.keys(statusCounts).map(function(st){
+          return `<div class="status-pill bdg ${badgeCls(st)}" onclick="setDashFiltro('${st==='Concluída'?'concluidas':'andamento'}')" style="cursor:pointer">${st} <strong>${statusCounts[st]}</strong></div>`;
+        }).join('')}
+      </div>
+      <div class="bar-chart" style="margin-top:14px">
+        ${Object.keys(statusCounts).map(function(st){
+          var w = Math.round(statusCounts[st]/totalObras*100);
+          var col = statusColors[st]||'#6B7280';
+          return `<div class="bar-row" onclick="setDashFiltro('${st==='Concluída'?'concluidas':'andamento'}')" style="cursor:pointer">
+            <div class="bar-label">${st}</div>
+            <div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${col}">${statusCounts[st]}</div></div>
+            <div style="font-size:11px;color:var(--txt3);width:32px;text-align:right">${w}%</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
+
+  if(!obrasFiltradas.length){
+    html += `<div class="card" style="text-align:center;padding:40px;color:var(--txt3)">
+      <div style="font-size:36px;margin-bottom:12px">📊</div>
+      <div style="font-size:14px">Nenhuma obra encontrada para este filtro.</div>
+    </div>`;
+  } else {
+    var tituloFiltro = _dashFiltro==='andamento' ? '🔄 Obras em andamento' : _dashFiltro==='concluidas' ? '✅ Obras concluídas' : '📋 Todas as obras';
+    html += `<div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:12px">${tituloFiltro} — ${state.unit} (${obrasFiltradas.length})</div>
+    <div class="dash-obras-grid">`;
+    obrasFiltradas.forEach(function(o){
+      var custo = custoTotalObra(o);
+      var nPrest = (o.prestadores||[]).length;
+      var pctMedPrest = nPrest ? Math.round((o.prestadores||[]).reduce(function(a,p){ return a+(p.pct||0); },0)/nPrest) : null;
+      html += `<div class="dash-obra-card" onclick="setDashFiltro('obra:${o.nome.replace(/'/g,"\\'")}')">
+        <div class="dash-obra-top">
+          <div>
+            <div class="dash-obra-nome">${o.nome}</div>
+            <div class="dash-obra-unit">${o.tipo} · Resp: ${o.responsavel}</div>
+            <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap">
+              <span class="bdg ${badgeCls(o.status)}">${o.status}</span>
+              <span class="bdg ${prioCls(o.prioridade)}">${o.prioridade}</span>
+            </div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div class="dash-obra-pct-big">${pctObra(o)}%</div>
+            <div class="dash-obra-pct-lbl">concluído</div>
+          </div>
+        </div>
+        <div class="pbar-lg"><div class="pfill-lg" style="width:${pctObra(o)}%;background:${pctObra(o)>=75?'var(--g)':pctObra(o)>=40?'var(--warn)':'var(--info)'}"></div></div>
+        ${o.atividade ? `<div style="font-size:11px;color:var(--g);margin-top:8px;font-weight:600">▶ ${o.atividade}</div>` : ''}
+        ${pctMedPrest!==null ? `<div style="font-size:11px;color:var(--txt3);margin-top:4px">👷 Prog. médio prestadores: <strong style="color:var(--txt2)">${pctMedPrest}%</strong></div>` : ''}
+        <div class="dash-custo-box">
+          <div style="font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">💰 Custo total da obra</div>
+          ${custo.contrato ? `<div class="dash-custo-row"><span class="dash-custo-lbl">Contrato principal</span><span class="dash-custo-val">${fmtVal(custo.contrato)}</span></div>` : ''}
+          ${custo.prestadores ? `<div class="dash-custo-row"><span class="dash-custo-lbl">Prestadores (${nPrest})</span><span class="dash-custo-val">${fmtVal(custo.prestadores)}</span></div>` : ''}
+          ${custo.orcamentos ? `<div class="dash-custo-row"><span class="dash-custo-lbl">Orçamentos aprovados</span><span class="dash-custo-val">${fmtVal(custo.orcamentos)}</span></div>` : ''}
+          <div class="dash-custo-row-total"><span>Total</span><span>${fmtVal(custo.total)}</span></div>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:var(--txt3)">📅 ${fmtData(o.inicio)} → ${fmtData(o.prazo)}</div>
+        <div style="margin-top:8px;font-size:11px;color:var(--txt2);font-weight:500">👆 Clique para ver detalhes</div>
+      </div>`;
+    });
+    html += '</div>';
+
+    if(obrasFiltradas.length > 1){
+      var sorted = obrasFiltradas.slice().sort(function(a,b){ return custoTotalObra(b).total-custoTotalObra(a).total; });
+      var maxCusto = custoTotalObra(sorted[0]).total || 1;
+      html += `<div class="card">
+        <div class="sec-t">Ranking de custos</div>
+        <div class="bar-chart">
+          ${sorted.map(function(o){
+            var c = custoTotalObra(o); var w = Math.round(c.total/maxCusto*100)||1;
+            return `<div class="bar-row" onclick="setDashFiltro('obra:${o.nome.replace(/'/g,"\\'")}')">
+              <div class="bar-label" title="${o.nome}">${o.nome}</div>
+              <div class="bar-track"><div class="bar-fill" style="width:${w}%">${fmtValCompact(c.total)}</div></div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }
+  }
+
+  document.getElementById('dash-content').innerHTML = html;
+}
+
+// ── PRESTADORES (form de cadastro) ───────────────────────────────
+function mostrarAddPrestador(){
+  document.getElementById('add-prest-area').style.display = 'block';
+}
+function cancelarPrestador(){
+  document.getElementById('add-prest-area').style.display = 'none';
+  ['np-nome','np-doc','np-cont','np-serv','np-val','np-rt'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+}
+function confirmarPrestador(){
+  var nome = document.getElementById('np-nome').value.trim();
+  if(!nome){ alert('Informe o nome do prestador.'); return; }
+  prestadoresTemp.push({
+    id: Date.now(),
+    nome: nome,
+    doc: document.getElementById('np-doc').value,
+    contato: document.getElementById('np-cont').value,
+    servico: document.getElementById('np-serv').value,
+    valor: parseFloat(document.getElementById('np-val').value)||0,
+    rt: document.getElementById('np-rt').value,
+    pct: 0,
+    ocorrencias: []
+  });
+  pausarSync(30000); // pausa 30s para não sobrescrever prestadores recém-adicionados
+  cancelarPrestador();
+  renderPrestadoresTemp();
+}
+function renderPrestadoresTemp(){
+  var lista = document.getElementById('prest-list-new');
+  var empty = document.getElementById('prest-empty-msg');
+  if(!prestadoresTemp.length){ lista.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display = 'none';
+  lista.innerHTML = prestadoresTemp.map(function(p){
+    var vf = p.valor ? 'R$ '+p.valor.toLocaleString('pt-BR') : '—';
+    return `<div class="prest-row">
+      <div><div class="prest-nome">${p.nome}</div><div class="prest-info">${p.doc||'—'}</div></div>
+      <div><div class="prest-nome">${p.servico||'—'}</div><div class="prest-info">${p.contato||'—'}</div></div>
+      <div><div class="prest-nome">${vf}</div><div class="prest-info">RT: ${p.rt||'—'}</div></div>
+      <button class="btn-danger" style="padding:5px 8px;font-size:11px" onclick="removerPrestTemp(${p.id})">✕</button>
+    </div>`;
+  }).join('');
+}
+function removerPrestTemp(id){
+  prestadoresTemp = prestadoresTemp.filter(function(p){ return p.id!==id; });
+  renderPrestadoresTemp();
+}
+
+// ── OBRAS ─────────────────────────────────────────────────────────
+function cadastrarObra(){
+  var nome  = document.getElementById('c-nome').value.trim();
+  var tipo  = document.getElementById('c-tipo').value;
+  var resp  = document.getElementById('c-resp').value.trim();
+  var desc  = document.getElementById('c-desc').value.trim();
+  var ini   = document.getElementById('c-inicio').value;
+  var prazo = document.getElementById('c-prazo').value;
+  if(!nome||!tipo||!resp||!desc||!ini||!prazo){ mostrarNotify('n-warn','warn'); return; }
+  var obra = {
+    id: Date.now(), nome:nome, tipo:tipo, responsavel:resp,
+    valor: parseFloat(document.getElementById('c-valor').value)||0,
+    area: document.getElementById('c-area').value,
+    inicio:ini, prazo:prazo,
+    prioridade: document.getElementById('c-prio').value,
+    status: document.getElementById('c-status').value,
+    descricao: desc, pct:0, unidade:state.unit,
+    dataCad: new Date().toLocaleDateString('pt-BR'),
+    prestadores: prestadoresTemp.slice(),
+    atividade:'', ocorrencias:[]
+  };
+  state.obras[state.unit].push(obra);
+  prestadoresTemp = [];
+  pausarSync(45000); // pausa 45s para garantir que o Sheets receba a obra com prestadores antes do próximo sync
+  saveLocal();
+  enviarSheets(obraParaSheets(obra));
+  // Envia cada prestador individualmente ao Sheets também
+  obra.prestadores.forEach(function(p){
+    enviarSheets({
+      tipo:'prestador', unidade:state.unit, obra:obra.nome,
+      nome:p.nome, doc:p.doc, contato:p.contato,
+      servico:p.servico, valor:p.valor, rt:p.rt,
+      pct:0, ultimaAtualizacao:new Date().toLocaleDateString('pt-BR'), obs:''
+    });
+  });
+  renderObras();
+  limparCad();
+  mostrarNotify('n-ok','ok');
+  atualizarSelects();
+}
+
+function obraParaSheets(o){
+  return { tipo:'obra', id:o.id, unidade:o.unidade, nome:o.nome, tipoObra:o.tipo, responsavel:o.responsavel,
+    valor:o.valor, area:o.area, inicio:o.inicio, prazo:o.prazo, prioridade:o.prioridade, status:o.status,
+    pct:o.pct, descricao:o.descricao, atividade:o.atividade,
+    prestadores:o.prestadores.map(function(p){ return p.nome; }).join('; '), dataCad:o.dataCad };
+}
+
+function renderObras(){
+  var u = state.unit, obras = state.obras[u]||[];
+  var lista = document.getElementById('lista-obras');
+  var empty = document.getElementById('empty-obras');
+  document.getElementById('uh-count-cad').textContent = obras.length;
+  if(!obras.length){ lista.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  lista.innerHTML = obras.map(function(o,i){
+    var custo = custoTotalObra(o);
+    var nprest = (o.prestadores||[]).length;
+    return `<div>
+      <div class="obra-card" onclick="toggleObra('det-${o.id}',this)" id="card-${o.id}">
+        <div class="obra-num">#${String(i+1).padStart(3,'0')}</div>
+        <div>
+          <div class="obra-name">${o.nome}</div>
+          <div class="obra-meta">${o.tipo} · ${o.responsavel} · Início: ${fmtData(o.inicio)} · ${nprest} prestador(es)</div>
+        </div>
+        <div><span class="bdg ${prioCls(o.prioridade)}">${o.prioridade}</span></div>
+        <div class="obra-val">${fmtVal(custo.total)}</div>
+        <div><span class="bdg ${badgeCls(o.status)}">${o.status}</span></div>
+      </div>
+      <div class="obra-detail" id="det-${o.id}">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px;font-size:12px">
+          <div><strong style="color:var(--txt3);font-size:10px;text-transform:uppercase">Área</strong><div style="margin-top:3px">${o.area||'—'} m²</div></div>
+          <div><strong style="color:var(--txt3);font-size:10px;text-transform:uppercase">Prazo</strong><div style="margin-top:3px">${fmtData(o.prazo)}</div></div>
+          <div><strong style="color:var(--txt3);font-size:10px;text-transform:uppercase">% Concluído</strong><div style="margin-top:3px;font-weight:700;color:var(--g)">${pctObra(o)}%</div></div>
+          <div><strong style="color:var(--txt3);font-size:10px;text-transform:uppercase">Custo total</strong><div style="margin-top:3px;font-weight:700;color:var(--txt)">${fmtVal(custo.total)}</div></div>
+        </div>
+        ${custo.prestadores || custo.orcamentos ? `<div class="dash-custo-box" style="margin-bottom:14px">
+          <div style="font-size:10px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Composição do custo</div>
+          ${custo.contrato?`<div class="dash-custo-row"><span class="dash-custo-lbl">Contrato</span><span class="dash-custo-val">${fmtVal(custo.contrato)}</span></div>`:''}
+          ${custo.prestadores?`<div class="dash-custo-row"><span class="dash-custo-lbl">Prestadores</span><span class="dash-custo-val">${fmtVal(custo.prestadores)}</span></div>`:''}
+          ${custo.orcamentos?`<div class="dash-custo-row"><span class="dash-custo-lbl">Orç. aprovados</span><span class="dash-custo-val">${fmtVal(custo.orcamentos)}</span></div>`:''}
+          <div class="dash-custo-row-total"><span>Total</span><span>${fmtVal(custo.total)}</span></div>
+        </div>` : ''}
+        <div style="font-size:12px;color:var(--txt2);margin-bottom:14px;line-height:1.6"><strong style="color:var(--txt3);font-size:10px;text-transform:uppercase;display:block;margin-bottom:4px">Descrição</strong>${o.descricao}</div>
+        ${(o.prestadores||[]).length ? `<div style="margin-bottom:14px"><strong style="color:var(--txt3);font-size:10px;text-transform:uppercase;display:block;margin-bottom:6px">Prestadores (${o.prestadores.length})</strong>
+          ${o.prestadores.map(function(p,pi){
+            return `<div style="font-size:12px;padding:8px 10px;background:var(--bg);border-radius:7px;margin-bottom:5px;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+              <div style="flex:1;min-width:0">
+                <strong>${p.nome}</strong>
+                <span style="color:var(--txt3);margin-left:6px">${p.servico||''}</span>
+                ${p.valor?'<span style="color:var(--g);font-weight:600;margin-left:6px">'+fmtVal(p.valor)+'</span>':''}
+                <span class="bdg bdg-b" style="font-size:10px;margin-left:6px">${p.pct||0}% feito</span>
+              </div>
+              <div style="display:flex;gap:6px;flex-shrink:0">
+                <button class="btn-sm-g" style="padding:4px 8px;font-size:11px;background:var(--info);border-color:var(--info)" onclick="abrirModalPrestador('${o.id}', event, ${pi})">✏️</button>
+                <button class="btn-danger" style="padding:4px 8px;font-size:11px" onclick="excluirPrestador('${o.id}', ${pi})">🗑</button>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>` : ''}
+        ${o.atividade ? `<div class="ativ-box" style="margin-bottom:10px"><strong>Atividade em andamento</strong><span>${o.atividade}</span></div>` : ''}
+        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="btn-sm-g" onclick="abrirModalEditarObra('${o.id}', event)">📝 Editar obra</button>
+          <button class="btn-sm-g" onclick="abrirModal('${o.id}', event)">📊 Editar andamento</button>
+          <button class="btn-sm-g" style="background:var(--info);border-color:var(--info)" onclick="abrirModalPrestador('${o.id}', event)">👷 Adicionar prestador</button>
+          <button class="btn-danger" onclick="excluirObra('${o.id}', event)">🗑 Excluir obra</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleObra(id, card){
+  var det = document.getElementById(id), isOpen = det.classList.contains('show');
+  document.querySelectorAll('.obra-detail').forEach(function(x){ x.classList.remove('show'); });
+  document.querySelectorAll('.obra-card').forEach(function(x){ x.classList.remove('expanded'); });
+  if(!isOpen){ det.classList.add('show'); card.classList.add('expanded'); }
+}
+
+function excluirObra(id, e){
+  if(e) e.stopPropagation();
+  if(!confirm('Excluir esta obra e todos os seus dados?')) return;
+  var obra = (state.obras[state.unit]||[]).find(function(o){ return String(o.id)===String(id); });
+  state.obras[state.unit] = (state.obras[state.unit]||[]).filter(function(o){ return String(o.id)!==String(id); });
+  // Remove orçamentos vinculados à obra
+  if(obra && state.orcs[state.unit]){
+    state.orcs[state.unit] = state.orcs[state.unit].filter(function(orc){ return orc.obra !== obra.nome; });
+  }
+  pausarSync(15000);
+  saveLocal(); renderObras(); atualizarSelects();
+  // Envia exclusão ao Sheets
+  if(obra) enviarSheets({tipo:'excluir_obra', unidade:state.unit, id:String(id), nome:obra.nome});
+  mostrarNotify('n-ok','ok');
+}
+
+function limparCad(){
+  ['c-nome','c-resp','c-valor','c-area','c-inicio','c-prazo','c-desc'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('c-tipo').value='';
+  document.getElementById('c-prio').selectedIndex=0;
+  document.getElementById('c-status').selectedIndex=0;
+  prestadoresTemp=[]; renderPrestadoresTemp();
+  document.getElementById('add-prest-area').style.display='none';
+}
+
+// ── MODAL EDITAR ANDAMENTO ────────────────────────────────────────
+function abrirModal(id, e){
+  if(e) e.stopPropagation();
+  var obra = encontrarObra(id); if(!obra) return;
+  modalObraId = id;
+  document.getElementById('modal-obra-nome').textContent = obra.nome + ' — ' + obra.tipo;
+  document.getElementById('edit-pct').value = obra.pct||0;
+  // set status select
+  var sel = document.getElementById('edit-status');
+  for(var i=0;i<sel.options.length;i++){ if(sel.options[i].text===obra.status) sel.selectedIndex=i; }
+  document.getElementById('edit-atividade').value = obra.atividade||'';
+  document.getElementById('edit-oc').value = '';
+  var hoje = new Date().toISOString().split('T')[0];
+  document.getElementById('edit-dt').value = hoje;
+  document.getElementById('modal-edit').style.display = 'flex';
+}
+function fecharModal(){
+  document.getElementById('modal-edit').style.display = 'none';
+  modalObraId = null;
+}
+function salvarEdicaoObra(){
+  var obra = encontrarObra(modalObraId); if(!obra) return;
+  obra.pct = Math.min(100,Math.max(0,parseInt(document.getElementById('edit-pct').value)||0));
+  obra.status = document.getElementById('edit-status').value;
+  obra.atividade = document.getElementById('edit-atividade').value.trim();
+  var desc = document.getElementById('edit-oc').value.trim();
+  if(desc){
+    var data = document.getElementById('edit-dt').value;
+    var tipo = document.getElementById('edit-tp').value;
+    var dataFmt = data ? fmtData(data) : new Date().toLocaleDateString('pt-BR');
+    obra.ocorrencias = obra.ocorrencias||[];
+    obra.ocorrencias.push(dataFmt+'|'+tipo+'|'+desc);
+  }
+  saveLocal();
+  enviarSheets({tipo:'atualizacao',id:modalObraId,unidade:state.unit,pct:obra.pct,status:obra.status,atividade:obra.atividade});
+  mostrarNotify('n-ok','ok');
+  fecharModal();
+  renderPage();
+}
+
+// ── ACOMPANHAMENTO ────────────────────────────────────────────────
+function renderAcompanhamento(){
+  var obras = state.obras[state.unit]||[];
+  var container = document.getElementById('acomp-lista');
+  var emptyMsg  = document.getElementById('upd-empty-msg');
+  if(!obras.length){ emptyMsg.style.display='block'; container.innerHTML=''; document.getElementById('uh-pct-upd').textContent='—'; return; }
+  emptyMsg.style.display='none';
+  var total = obras.reduce(function(a,o){ return a+(o.pct||0); },0);
+  document.getElementById('uh-pct-upd').textContent = Math.round(total/obras.length)+'%';
+
+  // ── Salva estado antes de re-renderizar (cards abertos, campos digitados) ──
+  var abertos = {};
+  var prestAbertos = {};
+  var camposDigitados = {};
+  container.querySelectorAll('.acomp-body.show').forEach(function(el){
+    abertos[el.id] = true;
+  });
+  container.querySelectorAll('.prest-update-form.show').forEach(function(el){
+    prestAbertos[el.id] = true;
+  });
+  // Salva valores digitados em inputs/textareas que o usuário ainda não salvou
+  container.querySelectorAll('input[id], textarea[id]').forEach(function(el){
+    if(el.value !== (el.defaultValue||'')) camposDigitados[el.id] = el.value;
+  });
+
+  container.innerHTML = obras.map(function(o){
+    var logs = (o.ocorrencias||[]).slice().reverse();
+    var custo = custoTotalObra(o);
+    return `<div class="acomp-card">
+      <div class="acomp-header" onclick="toggleAcomp('ac-${o.id}')">
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--txt)">${o.nome}</div>
+          <div style="font-size:11px;color:var(--txt3);margin-top:3px">${o.tipo} · ${o.responsavel}</div>
+          ${o.atividade ? `<div style="font-size:11px;color:var(--g);margin-top:3px;font-weight:600">▶ ${o.atividade}</div>` : ''}
+        </div>
+        <div style="text-align:center;min-width:80px">
+          <div style="font-size:20px;font-weight:700;color:var(--g)">${pctObra(o)}%</div>
+          <div class="pbar" style="width:80px;margin:4px auto 0"><div class="pfill" style="width:${pctObra(o)}%"></div></div>
+        </div>
+        <div><span class="bdg ${badgeCls(o.status)}">${o.status}</span></div>
+      </div>
+
+      <div class="acomp-body" id="ac-${o.id}">
+        <!-- Custo resumo -->
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
+          <div style="background:var(--gl);border:1px solid var(--gb);border-radius:9px;padding:8px 14px;font-size:12px">
+            <div style="color:var(--txt3);font-size:10px;text-transform:uppercase;font-weight:700">Custo Total</div>
+            <div style="font-size:16px;font-weight:700;color:var(--g);margin-top:2px">${fmtVal(custo.total)}</div>
+          </div>
+          ${custo.prestadores?`<div style="background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:8px 14px;font-size:12px">
+            <div style="color:var(--txt3);font-size:10px;text-transform:uppercase;font-weight:700">Prestadores</div>
+            <div style="font-size:14px;font-weight:700;color:var(--txt2);margin-top:2px">${fmtVal(custo.prestadores)}</div>
+          </div>`:''}
+        </div>
+
+        <!-- Botão editar -->
+        <div style="margin-bottom:14px">
+          <button class="btn-sm-g" onclick="abrirModal(${o.id}, event)">✏️ Editar andamento da obra</button>
+        </div>
+
+        <!-- Prestadores progresso -->
+        ${(o.prestadores||[]).length ? `<div style="margin-bottom:14px">
+          <div style="font-size:12px;font-weight:700;color:var(--txt);margin-bottom:8px">👷 Progresso por prestador</div>
+          ${o.prestadores.map(function(p,pi){
+            return `<div class="prest-acomp-card">
+              <div class="prest-acomp-header" onclick="togglePrestUpdate('pu-${o.id}-${pi}',this)">
+                <div>
+                  <div class="prest-acomp-name">${p.nome}</div>
+                  <div class="prest-acomp-serv">${p.servico||'—'} ${p.valor?'· '+fmtVal(p.valor):''}</div>
+                  <div class="pbar" style="margin-top:6px;width:160px"><div class="pfill" style="width:${p.pct||0}%"></div></div>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px">
+                  <div class="prest-acomp-pct">${p.pct||0}%</div>
+                  <span style="font-size:18px;color:var(--txt3)">›</span>
+                </div>
+              </div>
+              <div class="prest-update-form" id="pu-${o.id}-${pi}">
+                <div class="form-g" style="margin-bottom:10px">
+                  <div class="fld">
+                    <label>% Concluído</label>
+                    <input type="number" class="pct-input" id="pp-${o.id}-${pi}" min="0" max="100" value="${p.pct||0}" style="text-align:left" oninput="agendarAutosave(${o.id},${pi})">
+                  </div>
+                  <div class="fld">
+                    <label>O que está sendo feito?</label>
+                    <input type="text" id="pa-${o.id}-${pi}" value="${p.atividade||''}" placeholder="Descreva a atividade atual..." oninput="agendarAutosave(${o.id},${pi})">
+                  </div>
+                  <div class="fld form-full">
+                    <label>Registrar ocorrência / atualização</label>
+                    <textarea id="poc-${o.id}-${pi}" placeholder="Descreva o andamento, pendências, intercorrências..." style="min-height:60px" oninput="agendarAutosave(${o.id},${pi})"></textarea>
+                  </div>
+                </div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <button class="btn-sm-g" onclick="salvarProgressoPrestador('${o.id}', ${pi})">💾 Salvar progresso</button>
+                  <button class="btn-sm-g" style="background:var(--info);border-color:var(--info)" onclick="abrirModalPrestador('${o.id}', event, ${pi})">✏️ Editar</button>
+                  <button class="btn-danger" style="padding:6px 12px;font-size:12px" onclick="excluirPrestador('${o.id}', ${pi})">🗑 Excluir prestador</button>
+                </div>
+                ${(p.ocorrencias||[]).length ? `<div style="margin-top:12px">
+                  <div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Histórico prestador</div>
+                  ${p.ocorrencias.slice().reverse().map(function(oc){
+                    return `<div class="log-entry"><div class="log-dot" style="background:var(--info)"></div>
+                      <div><div class="log-txt">${oc}</div></div></div>`;
+                  }).join('')}
+                </div>` : ''}
+              </div>
+            </div>`;
+          }).join('')}
+        </div>` : ''}
+
+        <!-- Histórico obra -->
+        ${logs.length ? `<div>
+          <div style="font-size:12px;font-weight:700;color:var(--txt);margin-bottom:10px">📜 Histórico (${logs.length} registro(s))</div>
+          <div style="max-height:240px;overflow-y:auto">
+            ${logs.map(function(oc){
+              var partes = oc.split('|');
+              var data = partes[0]||'', tipo = partes[1]||'', txt = partes[2]||oc;
+              var tc = {'Pendência':'bdg-o','Intercorrência':'bdg-r','Paralisação':'bdg-r','Vistoria':'bdg-b','Entrega parcial':'bdg-g','Retomada':'bdg-g'}[tipo]||'bdg-gray';
+              return `<div class="log-entry"><div class="log-dot"></div><div style="flex:1">
+                <div class="log-txt">${txt}</div>
+                <div style="display:flex;gap:8px;margin-top:4px;align-items:center">
+                  ${data?'<span class="log-data">'+data+'</span>':''}
+                  ${tipo?'<span class="bdg '+tc+'" style="font-size:10px;padding:1px 7px">'+tipo+'</span>':''}
+                </div>
+              </div></div>`;
+            }).join('')}
+          </div>
+        </div>` : '<div style="font-size:12px;color:var(--txt3);text-align:center;padding:12px">Nenhuma ocorrência registrada ainda.</div>'}
+      </div>
+    </div>`;
+  }).join('');
+
+  // ── Restaura estado: cards abertos, prestadores abertos, campos digitados ──
+  Object.keys(abertos).forEach(function(id){
+    var el = document.getElementById(id);
+    if(el) el.classList.add('show');
+  });
+  Object.keys(prestAbertos).forEach(function(id){
+    var el = document.getElementById(id);
+    if(el){
+      el.classList.add('show');
+      // Marca o header correspondente como aberto
+      var card = el.closest('.prest-acomp-card');
+      if(card){ var h = card.querySelector('.prest-acomp-header'); if(h) h.classList.add('open'); }
+    }
+  });
+  // Restaura valores que o usuário estava digitando
+  Object.keys(camposDigitados).forEach(function(id){
+    var el = document.getElementById(id);
+    if(el && !el.value) el.value = camposDigitados[id];
+  });
+
+  // Seta datas
+  var hoje = new Date().toISOString().split('T')[0];
+  obras.forEach(function(o){
+    var dt = document.getElementById('dt-'+o.id);
+    if(dt && !dt.value) dt.value = hoje;
+  });
+}
+
+function toggleAcomp(id){
+  var el = document.getElementById(id);
+  var isOpen = el.classList.contains('show');
+  document.querySelectorAll('.acomp-body').forEach(function(x){ x.classList.remove('show'); });
+  if(!isOpen) el.classList.add('show');
+}
+
+function togglePrestUpdate(id, header){
+  var el = document.getElementById(id);
+  if(!el) return;
+  var isOpen = el.classList.contains('show');
+  // close all sibling forms
+  var card = header.closest('.prest-acomp-card');
+  if(card){ var parent = card.parentNode; parent.querySelectorAll('.prest-update-form').forEach(function(x){ x.classList.remove('show'); parent.querySelectorAll('.prest-acomp-header').forEach(function(h){ h.classList.remove('open'); }); }); }
+  if(!isOpen){ el.classList.add('show'); header.classList.add('open'); }
+}
+
+function salvarProgressoPrestador(obraId, prestIdx, silencioso){
+  var obra = encontrarObra(obraId); if(!obra) return;
+  var p = obra.prestadores[prestIdx]; if(!p) return;
+  var pctEl = document.getElementById('pp-'+obraId+'-'+prestIdx);
+  var atvEl = document.getElementById('pa-'+obraId+'-'+prestIdx);
+  var ocEl  = document.getElementById('poc-'+obraId+'-'+prestIdx);
+  if(!pctEl || !atvEl || !ocEl) return;
+  p.pct = Math.min(100,Math.max(0,parseInt(pctEl.value)||0));
+  p.atividade = atvEl.value.trim();
+  var oc = ocEl.value.trim();
+  if(oc){
+    p.ocorrencias = p.ocorrencias||[];
+    p.ocorrencias.push(new Date().toLocaleDateString('pt-BR')+' — '+oc);
+    ocEl.value='';
+  }
+  // Recalcula progresso geral da obra como média dos prestadores
+  if(obra.prestadores.length){
+    var media = Math.round(obra.prestadores.reduce(function(a,pr){ return a+(pr.pct||0); },0)/obra.prestadores.length);
+    // só atualiza o pct geral se não foi sobrescrito manualmente (usa o maior entre os dois)
+    obra.pct = media; // pctObra() usa a média dos prestadores em toda exibição
+  }
+  saveLocal();
+  // Envia atualização do prestador ao Sheets
+  p.ultimaAtualizacao = new Date().toLocaleDateString('pt-BR');
+  enviarSheets({
+    tipo:     'prestador',
+    unidade:  state.unit,
+    obra:     obra.nome,
+    nome:     p.nome,
+    doc:      p.doc      || '',
+    contato:  p.contato  || '',
+    servico:  p.servico  || '',
+    valor:    p.valor    || 0,
+    rt:       p.rt       || '',
+    pct:      p.pct,
+    ultimaAtualizacao: p.ultimaAtualizacao,
+    obs:      p.obs      || '',
+    ocorrencias: JSON.stringify(p.ocorrencias||[])
+  });
+  // Envia atualização geral da obra também
+  enviarSheets({
+    tipo:     'atualizacao',
+    id:       obra.id,
+    unidade:  state.unit,
+    pct:      obra.pct,
+    status:   obra.status,
+    atividade: obra.atividade || ''
+  });
+  pausarSync(20000);
+  // Restaura botão se foi autosave
+  var btn = document.querySelector('[onclick="salvarProgressoPrestador('+obraId+', '+prestIdx+')"]');
+  if(btn){ btn.textContent = '💾 Salvar progresso'; btn.disabled = false; }
+  if(!silencioso){
+    mostrarNotify('n-ok','ok','✅ Progresso salvo e sincronizado!');
+    renderAcompanhamento();
+  } else {
+    // Autosave: só atualiza % e barra sem fechar o formulário
+    var pctDisp = document.querySelector('.prest-acomp-card .prest-acomp-pct');
+    // Atualiza indicadores visuais sem recriar o HTML
+    var headerPct = document.getElementById('pu-'+obraId+'-'+prestIdx);
+    if(headerPct){
+      var card = headerPct.closest('.prest-acomp-card');
+      if(card){
+        var pctEl2 = card.querySelector('.prest-acomp-pct');
+        if(pctEl2) pctEl2.textContent = p.pct+'%';
+        var pbar = card.querySelector('.pfill');
+        if(pbar) pbar.style.width = p.pct+'%';
+      }
+    }
+    setSyncStatus('💾 Autosalvo · '+new Date().toLocaleTimeString('pt-BR'));
+  }
+}
+
+// ── EXCLUIR PRESTADOR ────────────────────────────────────────────
+function excluirPrestador(obraId, prestIdx){
+  var obra = encontrarObra(obraId); if(!obra) return;
+  var prest = (obra.prestadores||[])[prestIdx];
+  if(!prest) return;
+  if(!confirm('Excluir o prestador "'+prest.nome+'"? Esta ação não pode ser desfeita.')) return;
+
+  obra.prestadores.splice(prestIdx, 1);
+  pausarSync(15000);
+  saveLocal();
+  // Envia exclusão ao Sheets
+  enviarSheets({
+    tipo: 'excluir_prestador',
+    unidade: state.unit,
+    obraId: String(obraId),
+    obraNome: obra.nome,
+    prestNome: prest.nome
+  });
+  // Envia obra atualizada (sem o prestador)
+  enviarSheets(Object.assign({tipo:'obra', unidade:state.unit}, obra));
+  renderAcompanhamento();
+  mostrarNotify('n-ok','ok');
+}
+
+
+// ── MODAL PRESTADOR (incluir / editar) ───────────────────────────
+function abrirModalPrestador(obraId, e, prestIdx){
+  if(e) e.stopPropagation();
+  var obra = encontrarObra(obraId);
+  if(!obra) return;
+  var modal = document.getElementById('modal-prest');
+  modal.style.display = 'flex';
+  document.getElementById('mp-obra-id').value = String(obraId);
+  document.getElementById('mp-prest-idx').value = prestIdx !== undefined ? String(prestIdx) : '-1';
+  document.getElementById('modal-prest-obra-lbl').textContent = '🏗 ' + obra.nome;
+
+  if(prestIdx !== undefined && prestIdx >= 0){
+    var p = (obra.prestadores||[])[prestIdx];
+    if(!p) return;
+    document.getElementById('modal-prest-titulo').textContent = '✏️ Editar prestador';
+    document.getElementById('mp-nome').value    = p.nome||'';
+    document.getElementById('mp-doc').value     = p.doc||'';
+    document.getElementById('mp-contato').value = p.contato||'';
+    document.getElementById('mp-servico').value = p.servico||'';
+    document.getElementById('mp-valor').value   = p.valor||'';
+    document.getElementById('mp-rt').value      = p.rt||'';
+    document.getElementById('mp-pct').value     = p.pct||0;
+    document.getElementById('mp-obs').value     = p.obs||'';
+  } else {
+    document.getElementById('modal-prest-titulo').textContent = '👷 Adicionar prestador';
+    ['mp-nome','mp-doc','mp-contato','mp-servico','mp-valor','mp-rt','mp-obs'].forEach(function(id){ document.getElementById(id).value=''; });
+    document.getElementById('mp-pct').value = 0;
+  }
+}
+
+function fecharModalPrestador(){
+  document.getElementById('modal-prest').style.display = 'none';
+}
+
+function salvarModalPrestador(){
+  var nome = document.getElementById('mp-nome').value.trim();
+  if(!nome){ alert('Informe o nome do prestador.'); return; }
+  var obraId   = document.getElementById('mp-obra-id').value;
+  var prestIdx = parseInt(document.getElementById('mp-prest-idx').value);
+  var obra = encontrarObra(obraId);
+  if(!obra) return;
+  obra.prestadores = obra.prestadores||[];
+
+  var dados = {
+    nome:    nome,
+    doc:     document.getElementById('mp-doc').value.trim(),
+    contato: document.getElementById('mp-contato').value.trim(),
+    servico: document.getElementById('mp-servico').value.trim(),
+    valor:   parseFloat(document.getElementById('mp-valor').value)||0,
+    rt:      document.getElementById('mp-rt').value.trim(),
+    pct:     parseInt(document.getElementById('mp-pct').value)||0,
+    obs:     document.getElementById('mp-obs').value.trim(),
+    ultimaAtualizacao: new Date().toLocaleDateString('pt-BR'),
+    atividade: '', ocorrencias: []
+  };
+
+  if(prestIdx >= 0){
+    // Editar — preserva ocorrências
+    dados.ocorrencias = (obra.prestadores[prestIdx].ocorrencias||[]);
+    dados.atividade   = obra.prestadores[prestIdx].atividade||'';
+    obra.prestadores[prestIdx] = dados;
+  } else {
+    obra.prestadores.push(dados);
+  }
+
+  pausarSync(15000);
+  saveLocal();
+  enviarSheets({ tipo:'prestador', unidade:state.unit, obra:obra.nome,
+    nome:dados.nome, doc:dados.doc, contato:dados.contato, servico:dados.servico,
+    valor:dados.valor, rt:dados.rt, pct:dados.pct,
+    ultimaAtualizacao:dados.ultimaAtualizacao, obs:dados.obs });
+  enviarSheets(obraParaSheets(obra));
+  fecharModalPrestador();
+  renderPage();
+  mostrarNotify('n-ok','ok');
+}
+
+// ── MODAL EDITAR OBRA ─────────────────────────────────────────────
+function abrirModalEditarObra(obraId, e){
+  if(e) e.stopPropagation();
+  var obra = encontrarObra(obraId);
+  if(!obra) return;
+  document.getElementById('modal-obra-edit').style.display = 'flex';
+  document.getElementById('meo-id').value    = String(obraId);
+  document.getElementById('meo-nome').value  = obra.nome||'';
+  document.getElementById('meo-resp').value  = obra.responsavel||'';
+  document.getElementById('meo-valor').value = obra.valor||'';
+  document.getElementById('meo-area').value  = obra.area||'';
+  document.getElementById('meo-desc').value  = obra.descricao||'';
+  // Datas — converte dd/mm/yyyy para yyyy-mm-dd para o input type=date
+  function toInputDate(d){
+    if(!d) return '';
+    if(/^\d{2}\/\d{2}\/\d{4}/.test(d)){
+      var p=d.split('/'); return p[2]+'-'+p[1]+'-'+p[0];
+    }
+    return d.slice(0,10);
+  }
+  document.getElementById('meo-inicio').value = toInputDate(obra.inicio);
+  document.getElementById('meo-prazo').value  = toInputDate(obra.prazo);
+  // Selects
+  ['meo-tipo','meo-prio','meo-status'].forEach(function(id){
+    var sel = document.getElementById(id);
+    var val = id==='meo-tipo'?obra.tipo : id==='meo-prio'?obra.prioridade : obra.status;
+    for(var i=0;i<sel.options.length;i++){ if(sel.options[i].value===val||sel.options[i].text===val){ sel.selectedIndex=i; break; } }
+  });
+}
+
+function fecharModalEditarObra(){
+  document.getElementById('modal-obra-edit').style.display = 'none';
+}
+
+function salvarModalEditarObra(){
+  var obraId = document.getElementById('meo-id').value;
+  var obra   = encontrarObra(obraId);
+  if(!obra) return;
+  var nome = document.getElementById('meo-nome').value.trim();
+  if(!nome){ alert('Informe o nome da obra.'); return; }
+
+  var nomeAntigo = obra.nome;
+  obra.nome        = nome;
+  obra.tipo        = document.getElementById('meo-tipo').value;
+  obra.responsavel = document.getElementById('meo-resp').value.trim();
+  obra.valor       = parseFloat(document.getElementById('meo-valor').value)||0;
+  obra.area        = document.getElementById('meo-area').value;
+  obra.descricao   = document.getElementById('meo-desc').value.trim();
+  obra.prioridade  = document.getElementById('meo-prio').value;
+  obra.status      = document.getElementById('meo-status').value;
+  // Converte yyyy-mm-dd para dd/mm/yyyy
+  function fromInputDate(d){ if(!d) return ''; var p=d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+  obra.inicio = fromInputDate(document.getElementById('meo-inicio').value);
+  obra.prazo  = fromInputDate(document.getElementById('meo-prazo').value);
+
+  // Se o nome mudou, atualiza orçamentos vinculados
+  if(nomeAntigo !== nome && state.orcs[state.unit]){
+    state.orcs[state.unit].forEach(function(orc){
+      if(orc.obra === nomeAntigo) orc.obra = nome;
+    });
+  }
+
+  pausarSync(15000);
+  saveLocal();
+  enviarSheets(obraParaSheets(obra));
+  fecharModalEditarObra();
+  renderObras();
+  atualizarSelects();
+  mostrarNotify('n-ok','ok');
+}
+// ── AUTOSAVE (3s após digitar) ───────────────────────────────────
+var _autoSaveTimers = {};
+
+function agendarAutosave(obraId, prestIdx){
+  var key = obraId+'-'+prestIdx;
+  clearTimeout(_autoSaveTimers[key]);
+  // Mostra indicador discreto
+  var btn = document.querySelector('[onclick="salvarProgressoPrestador('+obraId+', '+prestIdx+')"]');
+  if(btn){ btn.textContent = '⏳ Salvando...'; btn.disabled = true; }
+  _autoSaveTimers[key] = setTimeout(function(){
+    salvarProgressoPrestador(obraId, prestIdx, true); // true = chamada silenciosa
+  }, 3000);
+}
+
+function salvarProgresso(id){
+  var obra = encontrarObra(id); if(!obra) return;
+  var pctEl = document.getElementById('pct-'+id);
+  var stEl  = document.getElementById('st-'+id);
+  var atvEl = document.getElementById('atv-'+id);
+  obra.pct = Math.min(100, Math.max(0, parseInt(pctEl.value)||0));
+  obra.status = stEl.value;
+  obra.atividade = atvEl.value.trim();
+  saveLocal();
+  pausarSync(20000);
+  enviarSheets({tipo:'atualizacao', id:id, unidade:state.unit, pct:obra.pct, status:obra.status, atividade:obra.atividade, ocorrencias: JSON.stringify(obra.ocorrencias||[])});
+  mostrarNotify('n-ok','ok','✅ Progresso da obra salvo!');
+  renderAcompanhamento();
+}
+
+function salvarOcorrencia(id){
+  var obra = encontrarObra(id); if(!obra) return;
+  var desc = document.getElementById('oc-'+id).value.trim();
+  var data = document.getElementById('dt-'+id).value;
+  var tipo = document.getElementById('tp-'+id).value;
+  if(!desc){ mostrarNotify('n-warn','warn'); return; }
+  obra.ocorrencias = obra.ocorrencias||[];
+  var dataFmt = data ? fmtData(data) : new Date().toLocaleDateString('pt-BR');
+  obra.ocorrencias.push(dataFmt+'|'+tipo+'|'+desc);
+  document.getElementById('oc-'+id).value='';
+  saveLocal();
+  // Persiste ocorrência no Sheets como atualização da obra
+  enviarSheets({
+    tipo:     'atualizacao',
+    id:       obra.id,
+    unidade:  state.unit,
+    pct:      obra.pct      || 0,
+    status:   obra.status   || '',
+    atividade: obra.atividade || '',
+    ocorrencias: JSON.stringify(obra.ocorrencias)
+  });
+  mostrarNotify('n-ok','ok');
+  renderAcompanhamento();
+}
+
+function encontrarObra(id){
+  var found = null;
+  var sid = String(id);
+  var allUnits = Object.keys(state.obras);
+  (state.obras[state.unit]||[]).forEach(function(o){ if(String(o.id)===sid) found=o; });
+  if(!found) allUnits.forEach(function(u){ (state.obras[u]||[]).forEach(function(o){ if(String(o.id)===sid) found=o; }); });
+  return found;
+}
+
+// ── PORTAL PRESTADOR ──────────────────────────────────────────────
+
+
+// ── ORÇAMENTOS ────────────────────────────────────────────────────
+var orcFiles = [];
+var orcFilesData = []; // {name, base64, type}
+
+function anexarOrc(inp){
+  orcFiles = Array.from(inp.files);
+  orcFilesData = [];
+  var lista = document.getElementById('orc-files-list');
+  if(!orcFiles.length){ lista.style.display='none'; return; }
+  lista.style.display='block';
+  lista.innerHTML = orcFiles.map(function(f){ return '<div style="font-size:12px;color:var(--txt2);padding:4px 0">📄 '+f.name+' <span style="color:var(--txt3)">(carregando...)</span></div>'; }).join('');
+  var pending = orcFiles.length;
+  orcFiles.forEach(function(f, i){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      orcFilesData[i] = { name: f.name, base64: e.target.result.split(',')[1], type: f.type||'application/octet-stream' };
+      pending--;
+      if(pending===0){
+        lista.innerHTML = orcFilesData.map(function(fd){ return '<div style="font-size:12px;color:var(--g);padding:4px 0">📄 '+fd.name+' ✓</div>'; }).join('');
+      }
+    };
+    reader.readAsDataURL(f);
+  });
+}
+
+function addOrcamento(){
+  var emp = document.getElementById('orc-emp').value.trim();
+  var val = parseFloat(document.getElementById('orc-val').value);
+  if(!emp||!val){ mostrarNotify('n-warn','warn'); return; }
+  var obraRef = document.getElementById('orc-obra').value;
+  if(!obraRef||obraRef.includes('Selecione')){ mostrarNotify('n-warn','warn'); return; }
+  var segSelect = document.getElementById('orc-seg').value;
+  var segCustom = document.getElementById('orc-seg-custom').value.trim();
+  var seg = segCustom || (segSelect&&!segSelect.includes('Selecione')?segSelect:'Geral');
+  var orc = {
+    id: String(Date.now()), empresa:emp, cnpj: document.getElementById('orc-cnpj').value,
+    contato: document.getElementById('orc-cont').value,
+    valor: val, prazo: document.getElementById('orc-prazo').value,
+    garantia: document.getElementById('orc-gar').value,
+    obs: document.getElementById('orc-obs').value,
+    obra: obraRef, segmento: seg, aprovado: false,
+    arquivos: [], arquivosLinks: [],
+    data: new Date().toLocaleDateString('pt-BR')
+  };
+  state.orcs[state.unit] = state.orcs[state.unit]||[];
+  state.orcs[state.unit].push(orc);
+  pausarSync(20000);
+  saveLocal();
+  renderOrcamentos(); limparOrc(); mostrarNotify('n-ok','ok');
+
+  // Envia arquivos ao Drive e depois salva orc completo
+  if(orcFilesData.length && SCRIPT_URL){
+    var filesParaEnviar = orcFilesData.slice();
+    var totalFiles = filesParaEnviar.length;
+    var done = 0;
+    mostrarNotify('n-info','info', '⏳ Enviando '+totalFiles+' arquivo(s)...');
+    filesParaEnviar.forEach(function(fd){
+      orc.arquivos.push(fd.name);
+      var body = new URLSearchParams({
+        tipo: 'upload_arquivo', orcId: String(orc.id),
+        fileName: fd.name, mimeType: fd.type||'application/octet-stream',
+        base64: fd.base64, obra: orc.obra||''
+      });
+      fetch(SCRIPT_URL, { method:'POST', body: body })
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+          if(data&&data.url){
+            orc.arquivosLinks = orc.arquivosLinks||[];
+            orc.arquivosLinks.push({nome:fd.name, url:data.url});
+          }
+          done++;
+          if(done===totalFiles){
+            var arquivosStr = (orc.arquivosLinks||[]).map(function(l){ return l.nome+': '+l.url; }).join('\n');
+            pausarSync(15000);
+            saveLocal();
+            enviarSheets(Object.assign({tipo:'orcamento',unidade:state.unit},orc,{arquivos:arquivosStr}));
+            renderOrcamentos();
+            mostrarNotify('n-ok','ok', '✅ Orçamento e arquivos salvos!');
+          }
+        })
+        .catch(function(){ done++; if(done===totalFiles) renderOrcamentos(); });
+    });
+  } else {
+    enviarSheets(Object.assign({tipo:'orcamento', unidade:state.unit}, orc));
+  }
+  orcFilesData = [];
+}
+
+function _salvarEstadoOrc(){
+  var estado = { abertos:{}, campos:{} };
+  var lista = document.getElementById('orc-lista'); if(!lista) return estado;
+  lista.querySelectorAll('[id^="seg-"]').forEach(function(el){
+    if(el.style.display !== 'none') estado.abertos[el.id] = true;
+  });
+  lista.querySelectorAll('input[id], textarea[id], select[id]').forEach(function(el){
+    if(el.value !== (el.defaultValue||'')) estado.campos[el.id] = el.value;
+  });
+  return estado;
+}
+function _restaurarEstadoOrc(estado){
+  Object.keys(estado.abertos||{}).forEach(function(id){
+    var el = document.getElementById(id); if(el) el.style.display = '';
+  });
+  Object.keys(estado.campos||{}).forEach(function(id){
+    var el = document.getElementById(id); if(el && !el.value) el.value = estado.campos[id];
+  });
+}
+
+function renderOrcamentos(){
+  var _estadoOrc = _salvarEstadoOrc();
+  var orcs = state.orcs[state.unit]||[];
+  document.getElementById('uh-orc-count').textContent = orcs.length;
+  var lista = document.getElementById('orc-obras-lista');
+  if(!orcs.length){ lista.innerHTML='<div class="card" style="text-align:center;padding:36px;color:var(--txt3)"><div style="font-size:28px;margin-bottom:8px">💰</div><div>Nenhum orçamento cadastrado para esta unidade. Preencha o formulário acima.</div></div>'; return; }
+
+  // Agrupar: obra → segmento → [orçamentos]
+  var byObra = {};
+  orcs.forEach(function(o){
+    var obra = (o.obra&&!o.obra.includes('Selecione'))?o.obra:'(Sem obra)';
+    var seg  = o.segmento||'Geral';
+    if(!byObra[obra]) byObra[obra]={};
+    if(!byObra[obra][seg]) byObra[obra][seg]=[];
+    byObra[obra][seg].push(o);
+  });
+
+  var colors = ['#00843D','#1D4ED8','#B45309','#7C3AED','#0F766E','#BE185D'];
+  var html = '';
+
+  Object.keys(byObra).forEach(function(obraNome){
+    var segs = byObra[obraNome];
+    var totalOrcs = Object.keys(segs).reduce(function(a,s){ return a+segs[s].length; },0);
+    var aprovados = Object.keys(segs).reduce(function(a,s){ return a+segs[s].filter(function(o){ return o.aprovado; }).length; },0);
+    // Total = soma do menor valor (ou aprovado) por segmento — não soma todos os fornecedores
+    var totalObra = Object.keys(segs).reduce(function(a,s){
+      var list = segs[s];
+      var aprovado = list.find(function(o){ return o.aprovado; });
+      if(aprovado) return a + aprovado.valor;
+      return a + Math.min.apply(null, list.map(function(o){ return o.valor; }));
+    }, 0);
+
+    html += `<div class="card" style="padding:0;overflow:hidden;margin-bottom:18px">
+      <div style="background:linear-gradient(135deg,var(--gd),var(--g2));padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:#fff">🏗 ${obraNome}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:2px">${totalOrcs} proposta(s) · ${Object.keys(segs).length} segmento(s) · ${aprovados} aprovado(s)</div>
+        </div>
+        <div style="text-align:right;color:#fff">
+          <div style="font-size:20px;font-weight:700">${fmtValCompact(totalObra)}</div>
+          <div style="font-size:10px;opacity:.6">total cotado</div>
+        </div>
+      </div>`;
+
+    Object.keys(segs).forEach(function(segNome){
+      var list = segs[segNome];
+      var min  = Math.min.apply(null, list.map(function(o){ return o.valor; }));
+      var max  = Math.max.apply(null, list.map(function(o){ return o.valor; }));
+      var aprovadoSeg = list.find(function(o){ return o.aprovado; });
+      var totalSeg = list.reduce(function(a,o){ return a+o.valor; },0);
+
+      html += `<div style="border-top:1px solid var(--border);padding:14px 20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div>
+            <span class="bdg bdg-b" style="font-size:12px">📂 ${segNome}</span>
+            <span style="font-size:11px;color:var(--txt3);margin-left:8px">${list.length} empresa(s) cotadas</span>
+          </div>
+          <div style="font-size:11px;color:var(--txt3)">Menor: <strong style="color:var(--g)">${fmtVal(min)}</strong> · Maior: <strong style="color:var(--err)">${fmtVal(max)}</strong></div>
+        </div>`;
+
+      list.forEach(function(o, i){
+        var isMin = o.valor===min;
+        var dif = o.valor>min ? ' +'+((((o.valor-min)/min)*100)).toFixed(1)+'%' : '';
+        var ini = o.empresa.split(' ').map(function(w){ return w[0]||''; }).join('').toUpperCase().slice(0,2)||'??';
+        // Monta bloco de arquivos com ações por arquivo
+        var arquivosHtml = '';
+        if(o.arquivosLinks&&o.arquivosLinks.length){
+          arquivosHtml = '<div style="margin-top:6px;display:flex;flex-direction:column;gap:4px">';
+          o.arquivosLinks.forEach(function(l,ai){
+            arquivosHtml += '<div style="display:flex;align-items:center;gap:6px;background:var(--gl);border-radius:6px;padding:4px 8px">'
+              +'<a href="'+l.url+'" target="_blank" style="color:var(--info);font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px" title="'+l.nome+'">📄 '+l.nome+'</a>'
+              +'<button onclick="substituirArquivoOrc(\''+o.id+'\','+ai+')" style="background:none;border:1px solid var(--border2);border-radius:4px;padding:2px 7px;font-size:10px;color:var(--txt2);cursor:pointer" title="Substituir">↑</button>'
+              +'<button onclick="excluirArquivoOrc(\''+o.id+'\','+ai+')" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:2px 7px;font-size:10px;color:var(--err);cursor:pointer" title="Excluir arquivo">✕</button>'
+              +'</div>';
+          });
+          arquivosHtml += '</div>';
+        } else if(o.arquivos&&o.arquivos.length){
+          arquivosHtml = '<div style="font-size:11px;color:var(--txt3);margin-top:4px">📄 '+o.arquivos.join(', ')+'</div>';
+        }
+        // Botão para adicionar novo arquivo
+        arquivosHtml += '<div style="margin-top:4px"><label style="cursor:pointer;font-size:11px;color:var(--g);display:inline-flex;align-items:center;gap:4px">'
+          +'<input type="file" style="display:none" onchange="adicionarArquivoOrc(\''+o.id+'\', this)">'
+          +'＋ Anexar arquivo</label></div>';
+
+        if(o.aprovado){
+          // Card simplificado para aprovado: só valor, link e excluir
+          var linkHtml = (o.arquivosLinks&&o.arquivosLinks.length)
+            ? o.arquivosLinks.map(function(l){ return '<a href="'+l.url+'" target="_blank" style="color:var(--info);font-size:11px;display:inline-flex;align-items:center;gap:4px;margin-right:8px">📄 '+l.nome+'</a>'; }).join('')
+            : (o.arquivos&&o.arquivos.length ? '<span style="font-size:11px;color:var(--txt3)">📄 '+o.arquivos.join(', ')+'</span>' : '');
+          html += `<div class="orc-card" style="margin-bottom:8px;background:var(--gl);border-color:var(--gb)">
+            <div class="orc-ini" style="background:#00843D">${ini}</div>
+            <div style="min-width:0;flex:1">
+              <div class="orc-n">${o.empresa} <span class="bdg bdg-g" style="font-size:10px">✅ Aprovado</span></div>
+              <div style="margin-top:4px">${linkHtml}</div>
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div class="orc-v" style="color:var(--g)">${fmtVal(o.valor)}</div>
+              <button class="btn-danger" style="padding:5px 10px;font-size:11px;margin-top:8px" onclick="excluirOrcId('${o.id}')">🗑</button>
+            </div>
+          </div>`;
+        } else {
+          html += `<div class="orc-card" style="margin-bottom:8px">
+            <div class="orc-ini" style="background:${colors[i%colors.length]}">${ini}</div>
+            <div style="min-width:0;flex:1">
+              <div class="orc-n">${o.empresa}</div>
+              <div class="orc-s">${o.prazo?'⏱ '+o.prazo+' · ':''}${o.garantia?'🛡 '+o.garantia+' · ':''}${o.data?'📅 '+o.data:''}</div>
+              ${o.obs?`<div style="font-size:11px;color:var(--txt3);margin-top:3px">${o.obs}</div>`:''}
+              ${arquivosHtml}
+            </div>
+            <div style="text-align:right;flex-shrink:0">
+              <div class="orc-v">${fmtVal(o.valor)}</div>
+              <div class="orc-tag" style="margin-top:4px">
+                ${isMin?'<span class="bdg bdg-g">✦ Menor</span>':'<span style="color:var(--err);font-size:11px;font-weight:600">'+dif+'</span>'}
+              </div>
+              <div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end">
+                <button class="btn-sm-g" onclick="aprovarOrcId('${o.id}')">✅ Aprovar</button>
+                <button class="btn-danger" style="padding:5px 10px;font-size:11px" onclick="excluirOrcId('${o.id}')">🗑</button>
+              </div>
+            </div>
+          </div>`;
+        }
+      });
+
+      // Recomendação do segmento
+      if(list.length>1){
+        var rec = list.slice().sort(function(a,b){ return a.valor-b.valor; })[0];
+        html += `<div class="ai-box" style="margin-top:6px">
+          <div class="ai-t">🤖 Recomendação do segmento</div>
+          <p><strong>${rec.empresa}</strong> apresenta o menor valor (${fmtVal(rec.valor)}) neste segmento. Diferença entre menor e maior: ${fmtVal(max-min)} (${(((max-min)/min)*100).toFixed(1)}%). Verifique escopo, garantias e certificações antes de aprovar.</p>
+        </div>`;
+      }
+      html += '</div>'; // fecha segmento
+    });
+
+    html += '</div>'; // fecha card obra
+  });
+
+  lista.innerHTML = html;
+  _restaurarEstadoOrc(_estadoOrc);
+}
+
+function aprovarOrcId(id){
+  var orc = (state.orcs[state.unit]||[]).find(function(o){ return String(o.id)===String(id); });
+  if(!orc){ mostrarNotify('n-err','err'); return; }
+  orc.aprovado = true;
+
+  var obra = null, jaExiste = false;
+
+  // ── Transfere orçamento aprovado como prestador na obra correspondente ──
+  if(orc.obra){
+    obra = (state.obras[state.unit]||[]).find(function(o){ return o.nome === orc.obra; });
+    if(obra){
+      obra.prestadores = obra.prestadores||[];
+      // Evita duplicata: verifica por empresa+serviço
+      jaExiste = !!obra.prestadores.find(function(p){
+        return p.nome === (orc.empresa||'') && p.servico === (orc.segmento||'');
+      });
+      if(!jaExiste){
+        var novoPrestador = {
+          nome:    orc.empresa   || '—',
+          doc:     orc.cnpj      || '',
+          contato: orc.contato   || '',
+          servico: orc.segmento  || 'Geral',
+          valor:   orc.valor     || 0,
+          rt: '', pct: 0, atividade: '',
+          ultimaAtualizacao: new Date().toLocaleDateString('pt-BR'),
+          obs: '', ocorrencias: []
+        };
+        obra.prestadores.push(novoPrestador);
+        enviarSheets({ tipo:'prestador', unidade:state.unit, obra:obra.nome,
+          nome:novoPrestador.nome, doc:novoPrestador.doc, contato:novoPrestador.contato,
+          servico:novoPrestador.servico, valor:novoPrestador.valor,
+          rt:'', pct:0, ultimaAtualizacao:novoPrestador.ultimaAtualizacao, obs:'' });
+        enviarSheets(obraParaSheets(obra));
+      }
+    }
+  }
+
+  pausarSync(30000);
+  saveLocal();
+  var arquivosStr = (orc.arquivosLinks||[]).length
+    ? orc.arquivosLinks.map(function(l){ return l.nome+': '+l.url; }).join('\n')
+    : (orc.arquivos||[]).join(',');
+  enviarSheets(Object.assign({tipo:'orcamento', unidade:state.unit}, orc, {aprovado:true, arquivos:arquivosStr}));
+  renderOrcamentos();
+  var msg = jaExiste
+    ? '✅ Orçamento aprovado! Prestador já vinculado à obra.'
+    : (obra ? '✅ Aprovado! '+( orc.empresa||'Empresa' )+' adicionado como prestador em "'+orc.obra+'".' : '✅ Orçamento aprovado com sucesso!');
+  mostrarNotify('n-ok','ok', msg);
+}
+function excluirOrcId(id){
+  if(!confirm('Excluir este orçamento?')) return;
+  var orc = (state.orcs[state.unit]||[]).find(function(o){ return String(o.id)===String(id); });
+  state.orcs[state.unit] = (state.orcs[state.unit]||[]).filter(function(o){ return String(o.id)!==String(id); });
+  pausarSync(15000);
+  saveLocal();
+  if(orc) enviarSheets(Object.assign({tipo:'excluir_orc', unidade:state.unit, id:id}, orc));
+  renderOrcamentos();
+  mostrarNotify('n-ok','ok');
+}
+function aprovarOrc(){
+  mostrarNotify('n-warn','warn');
+}
+
+// ── GESTÃO DE ARQUIVOS POR ORÇAMENTO ─────────────────────────
+function adicionarArquivoOrc(orcId, input){
+  var orc = (state.orcs[state.unit]||[]).find(function(o){ return String(o.id)===String(orcId); });
+  if(!orc||!input.files.length) return;
+  var f = input.files[0];
+  // Limite de 4MB por arquivo (base64 expande ~33%)
+  if(f.size > 4*1024*1024){
+    mostrarNotify('n-err','err', '❌ Arquivo muito grande. Máximo 4MB.');
+    return;
+  }
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var base64 = e.target.result.split(',')[1];
+    mostrarNotify('n-info','info', '⏳ Enviando arquivo...');
+    if(!SCRIPT_URL){ mostrarNotify('n-err','err','❌ Configure a URL do Apps Script.'); return; }
+    // Usa POST para suportar arquivos maiores (sem limite de URL)
+    var body = new URLSearchParams({
+      tipo: 'upload_arquivo',
+      orcId: String(orcId),
+      fileName: f.name,
+      mimeType: f.type||'application/octet-stream',
+      base64: base64,
+      obra: orc.obra||''
+    });
+    fetch(SCRIPT_URL, { method:'POST', body: body })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(data&&data.url){
+          orc.arquivosLinks = orc.arquivosLinks||[];
+          orc.arquivos = orc.arquivos||[];
+          orc.arquivosLinks.push({nome:f.name, url:data.url});
+          orc.arquivos.push(f.name);
+          pausarSync(20000);
+          saveLocal();
+          var arquivosStr = orc.arquivosLinks.map(function(l){ return l.nome+': '+l.url; }).join('\n');
+          enviarSheets(Object.assign({tipo:'orcamento',unidade:state.unit},orc,{arquivos:arquivosStr}));
+          renderOrcamentos();
+          mostrarNotify('n-ok','ok', '✅ Arquivo anexado com sucesso!');
+        } else {
+          console.error('upload erro', data);
+          mostrarNotify('n-err','err', '❌ Falha no upload. Verifique a URL do script.');
+        }
+      })
+      .catch(function(err){
+        console.error('upload catch', err);
+        mostrarNotify('n-err','err', '❌ Erro de rede no upload.');
+      });
+  };
+  reader.readAsDataURL(f);
+}
+
+function excluirArquivoOrc(orcId, arquivoIdx){
+  var orc = (state.orcs[state.unit]||[]).find(function(o){ return String(o.id)===String(orcId); });
+  if(!orc) return;
+  var links = Array.isArray(orc.arquivosLinks) ? orc.arquivosLinks : [];
+  var nomes = Array.isArray(orc.arquivos) ? orc.arquivos : [];
+  var link = links[arquivoIdx];
+  if(!confirm('Excluir o arquivo "'+(link?link.nome:nomes[arquivoIdx]||'este arquivo')+'"?')) return;
+
+  // Extrai fileId correto da URL do Google Drive
+  // Formatos: /d/FILEID/view  ou  id=FILEID
+  var fileId = '';
+  if(link && link.url){
+    var m1 = link.url.match(/\/d\/([-\w]{20,})/);
+    var m2 = link.url.match(/[?&]id=([-\w]{20,})/);
+    fileId = (m1&&m1[1]) || (m2&&m2[1]) || '';
+  }
+
+  // Remove localmente
+  orc.arquivosLinks = links.filter(function(_,i){ return i!==arquivoIdx; });
+  orc.arquivos = nomes.filter(function(_,i){ return i!==arquivoIdx; });
+  pausarSync(20000);
+  saveLocal();
+  renderOrcamentos();
+  mostrarNotify('n-ok','ok');
+
+  // Atualiza Sheets com arquivos atualizados
+  var arquivosStr = orc.arquivosLinks.map(function(l){ return l.nome+': '+l.url; }).join('\n');
+  enviarSheets(Object.assign({tipo:'orcamento',unidade:state.unit},orc,{arquivos:arquivosStr,aprovado:orc.aprovado}));
+
+  // Remove arquivo do Drive (fire-and-forget)
+  if(fileId && SCRIPT_URL){
+    var body = new URLSearchParams({tipo:'excluir_arquivo', fileId:fileId, orcId:String(orcId), unidade:state.unit});
+    fetch(SCRIPT_URL, {method:'POST', body:body}).catch(function(){});
+  }
+}
+
+function substituirArquivoOrc(orcId, arquivoIdx){
+  // Cria input oculto, dispara click para escolher arquivo, depois exclui o antigo e faz upload do novo
+  var input = document.createElement('input');
+  input.type='file';
+  input.onchange = function(){
+    if(!input.files.length) return;
+    excluirArquivoOrc(orcId, arquivoIdx); // remove antigo
+    setTimeout(function(){ adicionarArquivoOrc(orcId, input); }, 500); // adiciona novo
+  };
+  input.click();
+}
+function limparOrc(){
+  ['orc-emp','orc-cnpj','orc-cont','orc-val','orc-prazo','orc-gar','orc-obs','orc-seg-custom'].forEach(function(id){ var el=document.getElementById(id); if(el) el.value=''; });
+  var segEl=document.getElementById('orc-seg'); if(segEl) segEl.selectedIndex=0;
+  var obraEl=document.getElementById('orc-obra'); if(obraEl) obraEl.selectedIndex=0;
+  orcFiles=[]; document.getElementById('orc-files-list').style.display='none'; document.getElementById('orc-files-list').innerHTML='';
+  document.getElementById('orc-file').value='';
+}
+
+// ── SELECTS DINÂMICOS ─────────────────────────────────────────────
+function atualizarSelects(){
+  var obras = state.obras[state.unit]||[];
+  var opts = '<option>Selecione uma obra...</option>'+obras.map(function(o){ return '<option>'+o.nome+'</option>'; }).join('');
+  var el = document.getElementById('orc-obra'); if(el) el.innerHTML = opts;
+}
+
+// ── GOOGLE SHEETS ─────────────────────────────────────────────────
+function salvarUrl(){ SCRIPT_URL = document.getElementById('gs-url').value.trim(); localStorage.setItem('gs-url', SCRIPT_URL); }
+function syncGS(){
+  var url = document.getElementById('gs-url').value.trim();
+  if(!url){ mostrarNotify('n-err','err','❌ Cole a URL do Apps Script primeiro.'); return; }
+  SCRIPT_URL = url; localStorage.setItem('gs-url', url);
+  document.getElementById('sync-st').textContent = '⏳ Testando conexão...';
+  // Usa gsFetch (fetch + fallback JSONP) para testar a conexão de verdade
+  gsFetch(url, {tipo:'ping', ts:Date.now()}, function(err, data){
+    if(!err && data && data.status){
+      document.getElementById('sync-st').textContent = '🟢 Conectado · '+new Date().toLocaleTimeString('pt-BR');
+      mostrarNotify('n-ok','ok','✅ Conectado ao Google Sheets com sucesso!');
+      carregarDoSheets();
+    } else {
+      document.getElementById('sync-st').textContent = '🔴 Sem resposta do script';
+      mostrarNotify('n-err','err','❌ Não foi possível conectar. Verifique a URL e o deploy do script.');
+    }
+  });
+}
+function salvarSheets(){
+  if(!SCRIPT_URL){ mostrarNotify('n-err','err'); return; }
+  mostrarNotify('n-info','info');
+  var obras = state.obras[state.unit]||[], orcs = state.orcs[state.unit]||[];
+  var itens = obras.map(obraParaSheets).concat(orcs.map(function(o){ return Object.assign({tipo:'orcamento',unidade:state.unit},o); }));
+  if(!itens.length){ mostrarNotify('n-warn','warn'); return; }
+  var count=0; itens.forEach(function(item){ enviarSheets(item, function(){ count++; if(count===itens.length){ document.getElementById('sync-st').textContent='🟢 Enviado · '+new Date().toLocaleTimeString('pt-BR'); mostrarNotify('n-ok','ok'); } }); });
+}
+// Fila de reenvio para falhas
+var _filaReenvio = [];
+var _enviando = false;
+
+function enviarSheets(dados, cb){
+  if(!SCRIPT_URL) return;
+  // Sanitiza arquivos antes de enviar — sempre string, nunca array ou objeto
+  var d = Object.assign({}, dados);
+  if(d.tipo === 'orcamento'){
+    // Normaliza arquivosLinks para string "nome: url"
+    if(Array.isArray(d.arquivosLinks) && d.arquivosLinks.length){
+      d.arquivos = d.arquivosLinks.map(function(l){ return l.nome+': '+l.url; }).join('\n');
+    } else if(Array.isArray(d.arquivos)){
+      d.arquivos = d.arquivos.join(',');
+    }
+    delete d.arquivosLinks; // não envia array bruto
+    // Garante aprovado como string
+    d.aprovado = d.aprovado ? 'true' : 'false';
+    // Garante id como string
+    if(d.id) d.id = String(d.id);
+  }
+  _filaReenvio.push({dados:d, cb:cb, tentativas:0});
+  if(!_enviando) _processarFila();
+}
+
+function _processarFila(){
+  if(!_filaReenvio.length){ _enviando = false; return; }
+  _enviando = true;
+  var item = _filaReenvio[0];
+  var params = Object.keys(item.dados).map(function(k){
+    var v = item.dados[k];
+    return encodeURIComponent(k)+'='+encodeURIComponent(typeof v==='object'?JSON.stringify(v):String(v===null||v===undefined?'':v));
+  }).join('&');
+  var url = SCRIPT_URL+(SCRIPT_URL.indexOf('?')>=0?'&':'?')+params;
+
+  fetch(url, {mode:'no-cors'})
+    .then(function(){
+      _filaReenvio.shift();
+      if(item.cb) item.cb(true);
+      setTimeout(_processarFila, 300);
+    })
+    .catch(function(){
+      item.tentativas = (item.tentativas||0)+1;
+      if(item.tentativas >= 3){
+        // Desiste após 3 tentativas — salva no localStorage para não perder
+        console.warn('Falha ao enviar ao Sheets após 3 tentativas:', item.dados.tipo);
+        _filaReenvio.shift();
+        if(item.cb) item.cb(false);
+      }
+      setTimeout(_processarFila, 2000 * item.tentativas);
+    });
+}
+
+// ── EXPORT CSV ────────────────────────────────────────────────────
+function exportCSV(){
+  var obras = state.obras[state.unit]||[];
+  var rows = [['Unidade','Nome','Tipo','Responsável','Prestadores','Valor Contrato','Custo Total','Status','% Concluído','Atividade','Início','Prazo','Prioridade','Descrição']];
+  obras.forEach(function(o){
+    var custo = custoTotalObra(o);
+    rows.push([state.unit, o.nome, o.tipo, o.responsavel,
+      (o.prestadores||[]).map(function(p){ return p.nome; }).join('; '),
+      o.valor||0, custo.total, o.status, o.pct+'%', o.atividade||'', o.inicio, o.prazo, o.prioridade, o.descricao]);
+  });
+  var csv = '\uFEFF'+rows.map(function(r){ return r.map(function(c){ return '"'+(c+'').replace(/"/g,'""')+'"'; }).join(','); }).join('\n');
+  var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download = 'unimed-obras-'+state.unit.replace(/\s/g,'-')+'-'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();
+}
+
+// ── NOTIFY ────────────────────────────────────────────────────────
+function mostrarNotify(id, tipo, msg){
+  ['n-ok','n-err','n-warn','n-info'].forEach(function(nid){ var el=document.getElementById(nid); if(el) el.classList.remove('show'); });
+  var el = document.getElementById(id); if(!el) return;
+  if(msg){ var orig = el.textContent; el.textContent = msg; setTimeout(function(){ el.textContent = orig; }, 4000); }
+  el.className = 'notify '+tipo+' show';
+  setTimeout(function(){ el.classList.remove('show'); }, 4000);
+}
+
+// ── FECHAR MODAL CLICANDO FORA ──────────────────────────────────
+document.getElementById('modal-edit').addEventListener('click', function(e){
+  if(e.target === this) fecharModal();
+});
+
+// ── INIT ──────────────────────────────────────────────────────────
+window.addEventListener('load', function(){
+  var hoje = new Date().toISOString().split('T')[0];
+  document.querySelectorAll('input[type=date]').forEach(function(el){ if(!el.value) el.value=hoje; });
+  // Preenche campo de URL com o valor salvo (ou padrão)
+  var gsEl = document.getElementById('gs-url');
+  if(gsEl) gsEl.value = SCRIPT_URL;
+  renderPage();
+  atualizarSelects();
+  if(SCRIPT_URL){
+    setSyncStatus('⏳ Conectando...');
+    carregarDoSheets();
+  } else {
+    setSyncStatus('⚪ Cole a URL do script e clique em Testar');
+  }
+  setInterval(carregarDoSheets, 60000);
+});
+// ── GERADOR DE RELATÓRIO PDF ──────────────────────────────────
+function gerarRelatorioPDF(){
+  var unit = state.unit;
+  var obras = state.obras[unit]||[];
+  var orcs  = state.orcs[unit]||[];
+  var hoje  = new Date().toLocaleDateString('pt-BR');
+
+  // Agrupa orçamentos por obra → segmento
+  var orcsByObra = {};
+  orcs.forEach(function(o){
+    var obra = o.obra||'(Sem obra)';
+    if(!orcsByObra[obra]) orcsByObra[obra]={};
+    var seg = o.segmento||'Geral';
+    if(!orcsByObra[obra][seg]) orcsByObra[obra][seg]=[];
+    orcsByObra[obra][seg].push(o);
+  });
+
+  var html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+  <title>Relatório ${unit} — ${hoje}</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;color:#111;font-size:12px;background:#fff}
+    .page{max-width:900px;margin:0 auto;padding:32px}
+    h1{font-size:22px;color:#00843D;margin-bottom:4px}
+    .sub{color:#666;font-size:12px;margin-bottom:28px}
+    h2{font-size:15px;color:#00843D;border-bottom:2px solid #00843D;padding-bottom:6px;margin:24px 0 12px}
+    h3{font-size:13px;color:#004D23;margin:16px 0 8px;font-weight:700}
+    h4{font-size:12px;color:#1D4ED8;margin:10px 0 6px;font-weight:600}
+    table{width:100%;border-collapse:collapse;margin-bottom:12px;font-size:11px}
+    th{background:#00843D;color:#fff;padding:6px 10px;text-align:left;font-weight:600}
+    td{padding:5px 10px;border-bottom:1px solid #e5e7eb}
+    tr:nth-child(even) td{background:#f0f9f4}
+    .badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700}
+    .bdg-g{background:#d1fae5;color:#065f46}
+    .bdg-o{background:#fef3c7;color:#92400e}
+    .bdg-r{background:#fee2e2;color:#991b1b}
+    .bdg-b{background:#dbeafe;color:#1e40af}
+    .kpi-row{display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+    .kpi{background:#f0f9f4;border:1px solid #c8e6c9;border-radius:10px;padding:12px 18px;min-width:140px}
+    .kpi-val{font-size:22px;font-weight:700;color:#00843D}
+    .kpi-lbl{font-size:10px;color:#666;text-transform:uppercase;font-weight:600;margin-top:2px}
+    .obra-card{border:1px solid #e5e7eb;border-radius:10px;padding:14px;margin-bottom:14px;page-break-inside:avoid}
+    .obra-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+    .obra-nome{font-size:14px;font-weight:700;color:#004D23}
+    .obra-tipo{font-size:11px;color:#666;margin-top:2px}
+    .pbar{background:#e5e7eb;border-radius:4px;height:8px;width:120px;margin-top:4px}
+    .pfill{background:#00843D;border-radius:4px;height:8px}
+    .log-item{border-left:3px solid #c8e6c9;padding:4px 10px;margin-bottom:4px;font-size:11px}
+    .menor{color:#00843D;font-weight:700}
+    .aprovado{color:#00843D;font-style:italic}
+    .footer{margin-top:32px;border-top:1px solid #e5e7eb;padding-top:12px;color:#999;font-size:10px;text-align:center}
+    @media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  </style></head><body><div class="page">
+
+  <h1>📋 Relatório de Obras — ${unit}</h1>
+  <div class="sub">Gerado em ${hoje} · ${obras.length} obra(s) cadastrada(s)</div>
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-val">${obras.length}</div><div class="kpi-lbl">Total de obras</div></div>
+    <div class="kpi"><div class="kpi-val">${obras.filter(function(o){return o.status==='Em execução';}).length}</div><div class="kpi-lbl">Em execução</div></div>
+    <div class="kpi"><div class="kpi-val">${obras.filter(function(o){return o.status==='Concluída';}).length}</div><div class="kpi-lbl">Concluídas</div></div>
+    <div class="kpi"><div class="kpi-val">${obras.length?Math.round(obras.reduce(function(a,o){return a+(o.pct||0);},0)/obras.length):0}%</div><div class="kpi-lbl">Progresso médio</div></div>
+    <div class="kpi"><div class="kpi-val">R$${(obras.reduce(function(a,o){return a+(parseFloat(o.valor)||0);},0)/1000).toFixed(0)}k</div><div class="kpi-lbl">Contratos totais</div></div>
+  </div>
+
+  <!-- OBRAS -->
+  <h2>🏗 Obras</h2>`;
+
+  obras.forEach(function(o){
+    var statusCor = {'Em execução':'bdg-b','Concluída':'bdg-g','Paralisada':'bdg-r','Aguardando início':'bdg-o'}[o.status]||'bdg-b';
+    var logs = (o.ocorrencias||[]).slice(-5).reverse();
+    html += `<div class="obra-card">
+      <div class="obra-header">
+        <div>
+          <div class="obra-nome">${o.nome}</div>
+          <div class="obra-tipo">${o.tipo||'—'} · Resp: ${o.responsavel||'—'}</div>
+          ${o.inicio?'<div style="font-size:11px;color:#666;margin-top:2px">Início: '+o.inicio+(o.prazo?' · Prazo: '+o.prazo:'')+'</div>':''}
+        </div>
+        <div style="text-align:right">
+          <span class="badge ${statusCor}">${o.status||'—'}</span>
+          <div style="font-size:18px;font-weight:700;color:#00843D;margin-top:6px">${o.pct||0}%</div>
+          <div class="pbar"><div class="pfill" style="width:${o.pct||0}%"></div></div>
+        </div>
+      </div>
+      ${o.valor?'<div style="font-size:11px;margin-bottom:8px">Contrato: <strong>'+fmtVal(parseFloat(o.valor))+'</strong></div>':''}
+      ${o.atividade?'<div style="font-size:11px;color:#1D4ED8;margin-bottom:8px">▶ '+o.atividade+'</div>':''}`;
+
+    // Prestadores
+    if((o.prestadores||[]).length){
+      html += '<h4 style="margin-top:8px">👷 Prestadores</h4><table><tr><th>Nome</th><th>Serviço</th><th>Valor</th><th>% Concluído</th></tr>';
+      o.prestadores.forEach(function(p){
+        html += '<tr><td>'+p.nome+'</td><td>'+(p.servico||'—')+'</td><td>'+(p.valor?fmtVal(parseFloat(p.valor)):'—')+'</td><td>'+(p.pct||0)+'%</td></tr>';
+      });
+      html += '</table>';
+    }
+
+    // Histórico
+    if(logs.length){
+      html += '<h4>📜 Últimas ocorrências</h4>';
+      logs.forEach(function(oc){
+        var partes = oc.split('|');
+        var data = partes[0]||'', tipo = partes[1]||'', txt = partes[2]||oc;
+        html += '<div class="log-item"><strong>'+(data||'')+(tipo?' · '+tipo:'')+'</strong>'+(txt?' — '+txt:'')+'</div>';
+      });
+    }
+
+    html += '</div>';
+  });
+
+  // ORÇAMENTOS
+  html += '<h2 style="margin-top:28px">💰 Orçamentos por obra e segmento</h2>';
+
+  if(!Object.keys(orcsByObra).length){
+    html += '<p style="color:#999;font-size:12px">Nenhum orçamento cadastrado.</p>';
+  }
+
+  Object.keys(orcsByObra).forEach(function(obraNome){
+    html += '<h3>🏗 '+obraNome+'</h3>';
+    var segs = orcsByObra[obraNome];
+    Object.keys(segs).forEach(function(segNome){
+      var list = segs[segNome];
+      var min = Math.min.apply(null, list.map(function(x){return x.valor;}));
+      html += '<h4>📂 '+segNome+' ('+list.length+' proposta(s))</h4>';
+      html += '<table><tr><th>Empresa</th><th>Valor</th><th>Prazo</th><th>Garantia</th><th>Status</th></tr>';
+      list.slice().sort(function(a,b){return a.valor-b.valor;}).forEach(function(o){
+        var isMin = o.valor===min;
+        html += '<tr><td>'+(isMin?'<span class="menor">✦ </span>':'')+o.empresa+'</td>'
+          +'<td class="'+(isMin?'menor':'')+'">'+fmtVal(o.valor)+(isMin?' ✦':'')+'</td>'
+          +'<td>'+(o.prazo||'—')+'</td><td>'+(o.garantia||'—')+'</td>'
+          +'<td>'+(o.aprovado?'<span class="aprovado">✅ Aprovado</span>':'Pendente')+'</td></tr>';
+      });
+      html += '</table>';
+    });
+  });
+
+  html += '<div class="footer">Unimed Obras · '+unit+' · Relatório gerado em '+hoje+'</div>';
+  html += '</div></body></html>';
+
+  // Abre em nova aba e dispara impressão
+  var win = window.open('','_blank');
+  win.document.write(html);
+  win.document.close();
+  win.onload = function(){ win.print(); };
+}
+
+</script>
+</body>
+</html>
