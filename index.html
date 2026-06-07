@@ -52,6 +52,7 @@ button{cursor:pointer}
 .sb-url-box label{font-size:10px;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px}
 .sb-url-box input{width:100%;font-size:11px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:6px;padding:6px 8px;color:#fff;outline:none}
 .sb-url-box input::placeholder{color:rgba(255,255,255,.3)}
+.sb-url-box input[readonly]{opacity:.7;cursor:default}
 .sb-sync{margin:0 14px 14px;width:calc(100% - 28px);padding:10px;background:var(--g);color:#fff;border:none;border-radius:9px;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s}
 .sb-sync:hover{background:var(--g2)}
 .sync-st{font-size:10px;color:rgba(255,255,255,.4);text-align:center;padding-bottom:6px}
@@ -299,8 +300,8 @@ tbody tr:hover td{background:#F9FAFB}
 
   <div class="sb-url-box">
     <label>URL Google Apps Script</label>
-    <input type="text" id="gs-url" placeholder="https://script.google.com/macros/s/AKfycbzpdjlgW_OW4ZIZLzenWN3sJMdj_WqnAWcLNKaJcNXSX-EvIbTZshM32ypxCn32dJWLFQ/exec" oninput="salvarUrl()" style="font-size:10px;word-break:break-all">
-    <div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:5px">Cole a URL após implantar o script no Google Apps Script</div>
+    <input type="text" id="gs-url" readonly style="font-size:10px;word-break:break-all">
+    <div style="font-size:9px;color:rgba(255,255,255,.35);margin-top:5px">✅ URL configurada e compartilhada com todos os usuários</div>
   </div>
   <div class="sync-st" id="sync-st">⚪ Não conectado</div>
   <button class="sb-sync" onclick="syncGS()">☁️ Testar conexão</button>
@@ -633,18 +634,13 @@ var state = {
   orcs:  { 'Matriz':[], 'Campo Novo Parecis':[], 'Sapezal':[], 'Barra do Bugres':[], 'Oncologia':[], 'CMU':[] }
 };
 
-// Lê URL salva pelo usuário; usa a padrão só se não houver nenhuma salva
-var _URL_PADRAO = 'https://script.google.com/macros/s/AKfycbyNNNGVSYjfPfP0UPVTG1eOy7nSgMVxJDkI3Na5-z-TLjn-FZQ4L1JrkLyWnOjDaIkvyA/exec';
-var _storedUrl = localStorage.getItem('gs-url');
-var SCRIPT_URL = (_storedUrl && _storedUrl.indexOf('script.google.com') >= 0) ? _storedUrl : _URL_PADRAO;
-// Garante que localStorage sempre tem a URL correta
+// URL do Apps Script fixada no código — todos os usuários usam a mesma URL automaticamente
+var SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzpdjlgW_OW4ZIZLzenWN3sJMdj_WqnAWcLNKaJcNXSX-EvIbTZshM32ypxCn32dJWLFQ/exec';
+// Atualiza localStorage para compatibilidade com o campo de URL na sidebar
 localStorage.setItem('gs-url', SCRIPT_URL);
 
-// Cache local como fallback offline
-try {
-  var _cache = localStorage.getItem('unimed-obras-v2');
-  if(_cache){ var _cp = JSON.parse(_cache); state.obras = _cp.obras||state.obras; state.orcs = _cp.orcs||state.orcs; }
-} catch(e){}
+// Limpa cache antigo para garantir dados reais da planilha (BDObrasUnimed.xlsx)
+localStorage.removeItem('unimed-obras-v2');
 
 var prestadoresTemp = [];
 var modalObraId = null;
@@ -756,6 +752,13 @@ function sanitizarOrcs(orcsRaw){
       o.id      = String(o.id);
       o.empresa = String(o.empresa||'');
       o.obra    = String(o.obra||'');
+      // Normaliza 'aprovado': o Sheets retorna 'true', 'Sim', 'S' ou booleano
+      if(typeof o.aprovado === 'string'){
+        var s = o.aprovado.toLowerCase();
+        o.aprovado = (s === 'true' || s === 'sim' || s === 's');
+      } else {
+        o.aprovado = !!o.aprovado;
+      }
       // Normaliza arquivos: "nome: url\nnome2: url2"
       if(!Array.isArray(o.arquivosLinks) || !o.arquivosLinks.length){
         var arqStr = String(o.arquivos||'');
@@ -840,8 +843,18 @@ function mergeEstadoRemoto(obrasRemote, orcsRemote){
   Object.keys(obrasRemote).forEach(function(u){
     if(!state.obras[u]) state.obras[u] = [];
     var remotas = obrasRemote[u]||[];
+    // Remove duplicatas locais por ID antes do merge
+    var idsVistos = {};
+    state.obras[u] = state.obras[u].filter(function(o){
+      var key = String(o.id);
+      if(idsVistos[key]) return false;
+      idsVistos[key] = true;
+      return true;
+    });
     remotas.forEach(function(obraRemota){
-      var local = state.obras[u].find(function(o){ return String(o.id)===String(obraRemota.id) || o.nome===obraRemota.nome; });
+      // Busca por ID primeiro (mais confiável), depois por nome como fallback
+      var local = state.obras[u].find(function(o){ return String(o.id)===String(obraRemota.id); });
+      if(!local) local = state.obras[u].find(function(o){ return o.nome===obraRemota.nome && (!o.id || !obraRemota.id); });
       if(local){
         // Preserva campos locais críticos: prestadores, ocorrências (podem ter dado local mais recente)
         var prestLocal = local.prestadores||[];
@@ -891,12 +904,23 @@ function mergeEstadoRemoto(obrasRemote, orcsRemote){
 
   // ORÇAMENTOS: substitui normalmente (são sincronizados com ID único)
   // mas preserva orçamentos locais recentes (com id numérico alto = criados localmente)
+  // e preserva o estado 'aprovado' local caso o servidor ainda não tenha sincronizado
   Object.keys(orcsRemote).forEach(function(u){
+    var localOrcs = state.orcs[u]||[];
     var remotosIds = (orcsRemote[u]||[]).map(function(o){ return String(o.id); });
-    var soLocal = (state.orcs[u]||[]).filter(function(o){
+    var soLocal = localOrcs.filter(function(o){
       return !remotosIds.includes(String(o.id));
     });
-    state.orcs[u] = (orcsRemote[u]||[]).concat(soLocal);
+    // Merge: para cada orçamento remoto, preserva 'aprovado=true' local se o servidor ainda não atualizou
+    var mergedOrcs = (orcsRemote[u]||[]).map(function(oRemoto){
+      var oLocal = localOrcs.find(function(ol){ return String(ol.id) === String(oRemoto.id); });
+      if(oLocal && oLocal.aprovado && !oRemoto.aprovado){
+        // Local já foi aprovado mas servidor ainda não sincronizou: preserva aprovado
+        oRemoto.aprovado = true;
+      }
+      return oRemoto;
+    });
+    state.orcs[u] = mergedOrcs.concat(soLocal);
   });
   Object.keys(state.orcs).forEach(function(u){
     if(!orcsRemote[u]) return; // mantém locais se unidade não veio do servidor
@@ -984,7 +1008,7 @@ function pctObra(o){
 
 function custoTotalObra(obra){
   var contrato = parseFloat(obra.valor)||0;
-  var prestadores = (obra.prestadores||[]).reduce(function(a,p){ return a+(parseFloat(p.valor)||0); },0);
+  var prestadores = (obra.prestadores||[]).reduce(function(a,p){ return a+(parseBRL(p.valor)); },0);
   // Total = soma dos prestadores (o contrato é o valor original, não some ao custo executado)
   return { contrato:contrato, prestadores:prestadores, total:prestadores };
 }
@@ -997,6 +1021,18 @@ function setDashFiltro(f){
   renderDashboard();
 }
 
+function parseBRL(v){
+  if(!v) return 0;
+  if(typeof v === 'number') return v;
+  var s = String(v).replace(/[R$\s]/g, '');
+  if(s.indexOf(',') > -1 && s.indexOf('.') > -1){
+    s = s.replace(/\./g, '').replace(',', '.');
+  } else if(s.indexOf(',') > -1){
+    s = s.replace(',', '.');
+  }
+  return parseFloat(s) || 0;
+}
+
 function renderDashboard(){
   var obrasUnit = state.obras[state.unit]||[];
   var totalObras   = obrasUnit.length;
@@ -1004,8 +1040,8 @@ function renderDashboard(){
   var concluidas   = obrasUnit.filter(function(o){ return o.status==='Concluída'; }).length;
   var pctMedio = totalObras ? Math.round(obrasUnit.reduce(function(a,o){ return a+pctObra(o); },0)/totalObras) : 0;
   var totalPrest   = obrasUnit.reduce(function(a,o){ return a+(o.prestadores||[]).length; },0);
-  var custoContrato  = obrasUnit.reduce(function(a,o){ return a+(parseFloat(o.valor)||0); },0);
-  var custoPrest     = obrasUnit.reduce(function(a,o){ return a+(o.prestadores||[]).reduce(function(b,p){ return b+(parseFloat(p.valor)||0); },0); },0);
+  var custoContrato  = obrasUnit.reduce(function(a,o){ return a+(parseBRL(o.valor)); },0);
+  var custoPrest     = obrasUnit.reduce(function(a,o){ return a+(o.prestadores||[]).reduce(function(b,p){ return b+(parseBRL(p.valor)); },0); },0);
   var custoUnitTotal = custoPrest; // total = soma dos prestadores (contrato é referência separada)
   var statusColors   = {'Em execução':'#00843D','Concluída':'#0F766E','Planejada':'#6B7280','Em licitação':'#1D4ED8','Aguardando aprovação':'#D97706','Paralisada':'#DC2626'};
 
@@ -1970,7 +2006,7 @@ function salvarModalEditarObra(){
   mostrarNotify('n-ok','ok');
 }
 // ── AUTOSAVE (3s após digitar) ───────────────────────────────────
-var _autoSaveTimers = {};
+// _autoSaveTimers já declarado acima (linha 652)
 
 function agendarAutosave(obraId, prestIdx){
   var key = obraId+'-'+prestIdx;
@@ -2326,7 +2362,12 @@ function aprovarOrcId(id){
   var arquivosStr = (orc.arquivosLinks||[]).length
     ? orc.arquivosLinks.map(function(l){ return l.nome+': '+l.url; }).join('\n')
     : (orc.arquivos||[]).join(',');
-  enviarSheets(Object.assign({tipo:'orcamento', unidade:state.unit}, orc, {aprovado:true, arquivos:arquivosStr}));
+  // Envia aprovado='Sim' ao Sheets para manter o padrão da planilha
+  enviarSheets(Object.assign({tipo:'orcamento', unidade:state.unit}, orc, {aprovado:'Sim', arquivos:arquivosStr}));
+  // Re-envia após 5s para garantir persistência caso o primeiro envio falhe
+  setTimeout(function(){
+    if(orc.aprovado) enviarSheets(Object.assign({tipo:'orcamento', unidade:state.unit}, orc, {aprovado:'Sim', arquivos:arquivosStr}));
+  }, 5000);
   renderOrcamentos();
   var msg = jaExiste
     ? '✅ Orçamento aprovado! Prestador já vinculado à obra.'
@@ -2461,11 +2502,20 @@ function atualizarSelects(){
 }
 
 // ── GOOGLE SHEETS ─────────────────────────────────────────────────
-function salvarUrl(){ SCRIPT_URL = document.getElementById('gs-url').value.trim(); localStorage.setItem('gs-url', SCRIPT_URL); }
+function salvarUrl(){
+  // URL é fixa no código; esta função é mantida por compatibilidade mas não altera a URL
+  var el = document.getElementById('gs-url');
+  if(el && !el.readOnly){
+    var url = el.value.trim();
+    if(url && url.indexOf('script.google.com') >= 0){
+      SCRIPT_URL = url;
+      localStorage.setItem('gs-url', SCRIPT_URL);
+    }
+  }
+}
 function syncGS(){
-  var url = document.getElementById('gs-url').value.trim();
-  if(!url){ mostrarNotify('n-err','err','❌ Cole a URL do Apps Script primeiro.'); return; }
-  SCRIPT_URL = url; localStorage.setItem('gs-url', url);
+  var url = SCRIPT_URL; // Usa a URL fixa no código
+  if(!url){ mostrarNotify('n-err','err','❌ URL do Apps Script não configurada.'); return; }
   document.getElementById('sync-st').textContent = '⏳ Testando conexão...';
   // Usa gsFetch (fetch + fallback JSONP) para testar a conexão de verdade
   gsFetch(url, {tipo:'ping', ts:Date.now()}, function(err, data){
@@ -2574,9 +2624,13 @@ document.getElementById('modal-edit').addEventListener('click', function(e){
 window.addEventListener('load', function(){
   var hoje = new Date().toISOString().split('T')[0];
   document.querySelectorAll('input[type=date]').forEach(function(el){ if(!el.value) el.value=hoje; });
-  // Preenche campo de URL com o valor salvo (ou padrão)
+  // Preenche campo de URL com a URL fixa (somente leitura)
   var gsEl = document.getElementById('gs-url');
-  if(gsEl) gsEl.value = SCRIPT_URL;
+  if(gsEl){
+    gsEl.value = SCRIPT_URL;
+    gsEl.readOnly = true;
+    gsEl.title = 'URL configurada automaticamente para todos os usuários';
+  }
   renderPage();
   atualizarSelects();
   if(SCRIPT_URL){
@@ -2650,7 +2704,7 @@ function gerarRelatorioPDF(){
     <div class="kpi"><div class="kpi-val">${obras.filter(function(o){return o.status==='Em execução';}).length}</div><div class="kpi-lbl">Em execução</div></div>
     <div class="kpi"><div class="kpi-val">${obras.filter(function(o){return o.status==='Concluída';}).length}</div><div class="kpi-lbl">Concluídas</div></div>
     <div class="kpi"><div class="kpi-val">${obras.length?Math.round(obras.reduce(function(a,o){return a+(o.pct||0);},0)/obras.length):0}%</div><div class="kpi-lbl">Progresso médio</div></div>
-    <div class="kpi"><div class="kpi-val">R$${(obras.reduce(function(a,o){return a+(parseFloat(o.valor)||0);},0)/1000).toFixed(0)}k</div><div class="kpi-lbl">Contratos totais</div></div>
+    <div class="kpi"><div class="kpi-val">R$${(obras.reduce(function(a,o){return a+(parseBRL(o.valor));},0)/1000).toFixed(0)}k</div><div class="kpi-lbl">Contratos totais</div></div>
   </div>
 
   <!-- OBRAS -->
