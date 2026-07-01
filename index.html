@@ -220,6 +220,26 @@ tbody tr:hover td{background:#F9FAFB}
 .dash-filtro-btn{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--txt2);cursor:pointer;transition:all .15s;white-space:nowrap}
 .dash-filtro-btn:hover{border-color:var(--g);color:var(--g)}
 .dash-filtro-btn.on{background:var(--g);border-color:var(--g);color:#fff}
+
+/* Busca de obras */
+.obra-search-wrap{position:relative;flex:1;min-width:220px;max-width:360px}
+.obra-search-box{display:flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:5px 12px;transition:border-color .15s,box-shadow .15s}
+.obra-search-box:focus-within{border-color:var(--g);box-shadow:0 0 0 3px rgba(0,132,61,.12)}
+.obra-search-icon{font-size:12px;color:var(--txt3);flex-shrink:0}
+.obra-search-input{border:none;outline:none;background:none;font-size:12px;font-weight:500;color:var(--txt);width:100%}
+.obra-search-input::placeholder{color:var(--txt3);font-weight:400}
+.obra-search-clear{border:none;background:none;color:var(--txt3);cursor:pointer;font-size:13px;line-height:1;padding:2px 2px;flex-shrink:0;border-radius:50%}
+.obra-search-clear:hover{color:var(--err);background:rgba(220,38,38,.08)}
+.obra-search-drop{position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--card);border:1px solid var(--border);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.12);z-index:50;max-height:280px;overflow-y:auto;padding:6px}
+.obra-search-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:500;color:var(--txt)}
+.obra-search-item:hover,.obra-search-item.hl{background:var(--gl);color:var(--gd)}
+.obra-search-item .osi-ic{font-size:12px;opacity:.7;flex-shrink:0}
+.obra-search-item .osi-status{margin-left:auto;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--txt3);flex-shrink:0}
+.obra-search-empty{padding:14px 10px;text-align:center;font-size:12px;color:var(--txt3)}
+.obra-search-count{padding:6px 10px 2px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--txt3)}
+.obra-active-chip{display:flex;align-items:center;gap:6px;background:var(--g);border:1px solid var(--g);color:#fff;border-radius:20px;padding:4px 6px 4px 12px;font-size:11px;font-weight:600;white-space:nowrap}
+.obra-active-chip button{border:none;background:rgba(255,255,255,.2);color:#fff;width:18px;height:18px;border-radius:50%;cursor:pointer;font-size:12px;line-height:1;display:flex;align-items:center;justify-content:center}
+.obra-active-chip button:hover{background:rgba(255,255,255,.35)}
 .dash-obra-card:hover{border-color:var(--gb);box-shadow:0 4px 20px rgba(0,132,61,.1)}
 .dash-obra-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px}
 .dash-obra-nome{font-size:14px;font-weight:700;color:var(--txt)}
@@ -787,18 +807,38 @@ function sanitizarOrcs(orcsRaw){
   return orcsRaw;
 }
 
+// Converte o campo "ocorrencias" vindo do Sheets (chega como texto/JSON) de volta para array.
+// Sem isso, o valor ficava como string crua e era perdido/corrompido a cada sincronização.
+function parseOcorrenciasGs(v){
+  if(Array.isArray(v)) return v;
+  if(v===null || v===undefined || v==='') return [];
+  if(typeof v === 'string'){
+    var s = v.trim();
+    if(!s) return [];
+    try{
+      var parsed = JSON.parse(s);
+      if(Array.isArray(parsed)) return parsed;
+    }catch(e){}
+    // Não era JSON válido: trata como um registro legado único, em vez de descartar
+    return [s];
+  }
+  return [];
+}
+
 // Sanitiza obras vindas do servidor (converte campos que podem chegar como Date)
 function sanitizarObras(obrasRaw){
   Object.keys(obrasRaw).forEach(function(u){
     (obrasRaw[u]||[]).forEach(function(o){
-      o.inicio    = strData(o.inicio);
-      o.prazo     = strData(o.prazo);
-      o.atividade = String(o.atividade||'');
-      o.pct       = parseFloat(o.pct)||0;
+      o.inicio      = strData(o.inicio);
+      o.prazo       = strData(o.prazo);
+      o.atividade   = String(o.atividade||'');
+      o.pct         = parseFloat(o.pct)||0;
+      o.ocorrencias = parseOcorrenciasGs(o.ocorrencias);
       (o.prestadores||[]).forEach(function(p){
         p.atividade          = String(p.atividade||'');
         p.ultimaAtualizacao  = strData(p.ultimaAtualizacao);
         p.pct                = parseFloat(p.pct)||0;
+        p.ocorrencias        = parseOcorrenciasGs(p.ocorrencias);
       });
     });
   });
@@ -1015,11 +1055,130 @@ function custoTotalObra(obra){
 
 // ── DASHBOARD ────────────────────────────────────────────────────
 var _dashFiltro = 'todos'; // todos | andamento | concluidas | prestadores | obra:NOME
+var _obraSearchTerm = '';
+var _obraSearchHl = -1; // índice destacado no dropdown (navegação por teclado)
 
 function setDashFiltro(f){
   _dashFiltro = f;
   renderDashboard();
 }
+
+function normalizeStr(s){
+  return String(s||'')
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,''); // remove acentos
+}
+
+function obraSearchMatches(term){
+  var obrasUnit = state.obras[state.unit]||[];
+  var t = normalizeStr(term).trim();
+  if(!t) return [];
+  return obrasUnit.filter(function(o){ return normalizeStr(o.nome).indexOf(t) > -1; });
+}
+
+function statusIconFor(st){
+  return st==='Concluída' ? '&#9989;' : st==='Paralisada' ? '&#128721;' : st==='Em licitação' ? '&#128203;' : st==='Aguardando aprovação' ? '&#8987;' : st==='Planejada' ? '&#128197;' : '&#128295;';
+}
+
+function renderObraSearchDrop(term){
+  var drop = document.getElementById('obraSearchDrop');
+  if(!drop) return;
+  var t = (term||'').trim();
+  _obraSearchHl = -1;
+  if(!t){ drop.innerHTML = ''; return; }
+  var results = obraSearchMatches(t);
+  if(results.length === 0){
+    drop.innerHTML = '<div class="obra-search-drop"><div class="obra-search-empty">Nenhuma obra encontrada para "' + t.replace(/</g,'&lt;') + '"</div></div>';
+    return;
+  }
+  var maxShow = 30;
+  var html = '<div class="obra-search-drop" id="obraSearchDropInner">';
+  html += '<div class="obra-search-count">' + results.length + (results.length===1?' obra encontrada':' obras encontradas') + '</div>';
+  results.slice(0, maxShow).forEach(function(o, i){
+    var safeNome = o.nome.replace(/'/g,"\\'").replace(/</g,'&lt;');
+    html += '<div class="obra-search-item" data-idx="' + i + '" onmouseenter="obraSearchSetHl(' + i + ')" onclick="selectObraSearch(\'' + safeNome + '\')">'
+      + '<span class="osi-ic">' + statusIconFor(o.status) + '</span>'
+      + '<span>' + o.nome.replace(/</g,'&lt;') + '</span>'
+      + '<span class="osi-status">' + (o.status||'') + '</span>'
+      + '</div>';
+  });
+  if(results.length > maxShow){
+    html += '<div class="obra-search-empty">+ ' + (results.length - maxShow) + ' outra(s)... refine a busca</div>';
+  }
+  html += '</div>';
+  drop.innerHTML = html;
+}
+
+function onObraSearchInput(val){
+  _obraSearchTerm = val;
+  var clearBtn = document.getElementById('obraSearchClearBtn');
+  if(clearBtn) clearBtn.style.display = val ? '' : 'none';
+  renderObraSearchDrop(val);
+}
+
+function obraSearchSetHl(idx){
+  _obraSearchHl = idx;
+  var items = document.querySelectorAll('#obraSearchDropInner .obra-search-item');
+  items.forEach(function(el){ el.classList.remove('hl'); });
+  if(items[idx]) items[idx].classList.add('hl');
+}
+
+function selectObraSearch(nome){
+  _obraSearchTerm = '';
+  setDashFiltro('obra:' + nome);
+}
+
+function clearObraSearch(){
+  _obraSearchTerm = '';
+  var input = document.getElementById('obraSearchInput');
+  if(input) input.value = '';
+  var clearBtn = document.getElementById('obraSearchClearBtn');
+  if(clearBtn) clearBtn.style.display = 'none';
+  var drop = document.getElementById('obraSearchDrop');
+  if(drop) drop.innerHTML = '';
+  if(input) input.focus();
+}
+
+function onObraSearchKeydown(ev){
+  var items = document.querySelectorAll('#obraSearchDropInner .obra-search-item');
+  if(ev.key === 'Escape'){
+    clearObraSearch();
+    return;
+  }
+  if(ev.key === 'ArrowDown'){
+    ev.preventDefault();
+    if(!items.length) return;
+    _obraSearchHl = (_obraSearchHl + 1) % items.length;
+    obraSearchSetHl(_obraSearchHl);
+    items[_obraSearchHl].scrollIntoView({block:'nearest'});
+    return;
+  }
+  if(ev.key === 'ArrowUp'){
+    ev.preventDefault();
+    if(!items.length) return;
+    _obraSearchHl = (_obraSearchHl - 1 + items.length) % items.length;
+    obraSearchSetHl(_obraSearchHl);
+    items[_obraSearchHl].scrollIntoView({block:'nearest'});
+    return;
+  }
+  if(ev.key === 'Enter'){
+    ev.preventDefault();
+    var results = obraSearchMatches(_obraSearchTerm);
+    var pick = (_obraSearchHl > -1 && results[_obraSearchHl]) ? results[_obraSearchHl] : results[0];
+    if(pick) selectObraSearch(pick.nome);
+    return;
+  }
+}
+
+// Fecha o dropdown ao clicar fora do campo de busca
+document.addEventListener('click', function(ev){
+  var wrap = document.getElementById('obraSearchWrap');
+  if(!wrap) return;
+  if(!wrap.contains(ev.target)){
+    var drop = document.getElementById('obraSearchDrop');
+    if(drop) drop.innerHTML = '';
+  }
+});
 
 function parseBRL(v){
   if(!v) return 0;
@@ -1093,19 +1252,30 @@ function renderDashboard(){
     </div>
   </div>`;
 
-  // ── Filtros rápidos por obra ────────────────────────────────────
+  // ── Filtros rápidos + busca por obra ─────────────────────────────
   if(totalObras > 0){
+    var obraAtivaNome = _dashFiltro.indexOf('obra:') === 0 ? _dashFiltro.slice(5) : null;
     html += `<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
       <span style="font-size:11px;font-weight:600;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em">Filtrar:</span>
       <button class="dash-filtro-btn${_dashFiltro==='todos'?' on':''}" onclick="setDashFiltro('todos')">Todas</button>
       <button class="dash-filtro-btn${_dashFiltro==='andamento'?' on':''}" onclick="setDashFiltro('andamento')">Em andamento</button>
       <button class="dash-filtro-btn${_dashFiltro==='concluidas'?' on':''}" onclick="setDashFiltro('concluidas')">Concluídas</button>
       <button class="dash-filtro-btn${_dashFiltro==='prestadores'?' on':''}" onclick="setDashFiltro('prestadores')">Por prestador</button>
-      ${obrasUnit.map(function(o){
-        var key = 'obra:'+o.nome;
-        var btnCls = 'dash-filtro-btn' + (_dashFiltro===key ? ' on' : '');
-        return '<button class="' + btnCls + '" onclick="setDashFiltro(\'' + key.split("'").join('') + '\')">&#x1F4CB; ' + o.nome + '</button>';
-      }).join('')}
+      <div class="obra-search-wrap" id="obraSearchWrap">
+        <div class="obra-search-box">
+          <span class="obra-search-icon">&#x1F50D;</span>
+          <input type="text" class="obra-search-input" id="obraSearchInput"
+            placeholder="Buscar obra pelo nome..."
+            value="${_obraSearchTerm ? _obraSearchTerm.replace(/"/g,'&quot;') : ''}"
+            oninput="onObraSearchInput(this.value)"
+            onfocus="onObraSearchInput(this.value)"
+            onkeydown="onObraSearchKeydown(event)"
+            autocomplete="off">
+          ${_obraSearchTerm ? '<button class="obra-search-clear" id="obraSearchClearBtn" onclick="clearObraSearch()" title="Limpar busca">&#10005;</button>' : '<button class="obra-search-clear" id="obraSearchClearBtn" onclick="clearObraSearch()" title="Limpar busca" style="display:none">&#10005;</button>'}
+        </div>
+        <div id="obraSearchDrop"></div>
+      </div>
+      ${obraAtivaNome ? `<div class="obra-active-chip">&#x1F4CB; ${obraAtivaNome}<button onclick="setDashFiltro('todos')" title="Remover filtro">&#10005;</button></div>` : ''}
     </div>`;
   }
 
@@ -1681,17 +1851,17 @@ function renderAcompanhamento(){
                   <button class="btn-sm-g" style="background:var(--info);border-color:var(--info)" onclick="abrirModalPrestador('${o.id}', event, ${pi})">✏️ Editar</button>
                   <button class="btn-danger" style="padding:6px 12px;font-size:12px" onclick="excluirPrestador('${o.id}', ${pi})">🗑 Excluir prestador</button>
                 </div>
-                ${(p.ocorrencias||[]).length ? `<div style="margin-top:12px">
+                <div class="prest-hist-wrap" id="ph-${o.id}-${pi}" style="margin-top:12px${(p.ocorrencias||[]).length?'':';display:none'}">
                   <div style="font-size:11px;font-weight:700;color:var(--txt3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">Histórico prestador</div>
-                  ${p.ocorrencias.slice().reverse().map(function(oc){
+                  <div class="prest-hist-list">${(p.ocorrencias||[]).slice().reverse().map(function(oc){
                     return `<div class="log-entry"><div class="log-dot" style="background:var(--info)"></div>
                       <div><div class="log-txt">${oc}</div></div></div>`;
-                  }).join('')}
-                </div>` : ''}
+                  }).join('')}</div>
+                </div>
               </div>
             </div>`;
           }).join('')}
-        </div>` : ''}
+       </div>` : ''}
 
         <!-- Histórico obra -->
         ${logs.length ? `<div>
@@ -2786,7 +2956,211 @@ function gerarRelatorioPDF(){
   win.document.close();
   win.onload = function(){ win.print(); };
 }
+</script>
 
+<script>
+(function patchUnimedObras(){
+  'use strict';
+
+  // Aguarda o script principal terminar de carregar
+  function aplicar(){
+    if(typeof encontrarObra === 'undefined' || typeof saveLocal === 'undefined'){
+      setTimeout(aplicar, 100);
+      return;
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    //  PATCH 1 — salvarProgressoPrestador
+    //  Problema: obraId gerado como string '1782...' no template
+    //  literal mas encontrarObra() comparava com Number ou vice-versa,
+    //  resultando em obra = null e salvamento silenciosamente abortado.
+    //  Além disso, renderAcompanhamento() destruía campos em edição.
+    // ═══════════════════════════════════════════════════════════════
+    window.salvarProgressoPrestador = function(obraId, prestIdx, silencioso){
+      obraId   = String(obraId);
+      prestIdx = parseInt(prestIdx);
+
+      // ── Localiza a obra ────────────────────────────────────────
+      var obra = encontrarObra(obraId);
+      if(!obra){
+        // Diagnóstico: lista todos os IDs disponíveis no console
+        var todosIds = [];
+        Object.keys(state.obras).forEach(function(u){
+          (state.obras[u]||[]).forEach(function(o){ todosIds.push(String(o.id)); });
+        });
+        console.error('[UO] Obra não encontrada. obraId recebido:', obraId,
+          '| IDs disponíveis:', todosIds);
+        mostrarNotify('n-err','err','❌ Obra não encontrada. Recarregue a página.');
+        return;
+      }
+
+      // ── Localiza o prestador ───────────────────────────────────
+      var p = (obra.prestadores||[])[prestIdx];
+      if(!p){
+        console.error('[UO] Prestador idx='+prestIdx+' não existe. Total:', (obra.prestadores||[]).length);
+        mostrarNotify('n-err','err','❌ Prestador não encontrado.');
+        return;
+      }
+
+      // ── Localiza os campos no DOM ──────────────────────────────
+      var pctEl = document.getElementById('pp-'+obraId+'-'+prestIdx);
+      var atvEl = document.getElementById('pa-'+obraId+'-'+prestIdx);
+      var ocEl  = document.getElementById('poc-'+obraId+'-'+prestIdx);
+
+      // Fallback: o obraId pode ter sido renderizado levemente diferente
+      // (ex: com/sem aspas no template literal). Busca por sufixo.
+      if(!pctEl){
+        var todos = Array.from(document.querySelectorAll('[id^="pp-"]'));
+        todos.forEach(function(el){
+          // ID no formato: pp-{obraId}-{prestIdx}
+          // O obraId pode ter chegado como número vs string
+          var partes = el.id.split('-');
+          // pp - [partes do obraId] - prestIdx
+          // Como obraId pode ser timestamp (13 dígitos), está sempre no meio
+          var idxFinal = partes[partes.length - 1];
+          if(parseInt(idxFinal) === prestIdx){
+            // Verifica se o obraId bate (como número)
+            var idNaEl = partes.slice(1, partes.length - 1).join('-');
+            if(idNaEl === obraId || idNaEl === String(parseInt(obraId))){
+              pctEl = el;
+            }
+          }
+        });
+        if(pctEl){
+          // Reconstrói os IDs dos outros campos com o mesmo prefixo
+          var idBase = pctEl.id.slice('pp-'.length); // ex: "1782778815885-0"
+          atvEl = document.getElementById('pa-'+idBase);
+          ocEl  = document.getElementById('poc-'+idBase);
+          console.log('[UO] Campos encontrados via fallback. idBase:', idBase);
+        }
+      }
+
+      if(!pctEl || !atvEl || !ocEl){
+        console.error('[UO] Campos DOM não encontrados para pp-'+obraId+'-'+prestIdx);
+        var existentes = Array.from(document.querySelectorAll('[id^="pp-"]')).map(function(el){return el.id;});
+        console.error('[UO] Campos pp- existentes no DOM:', existentes);
+        mostrarNotify('n-err','err','❌ Feche e reabra o card do prestador e tente novamente.');
+        return;
+      }
+
+      // ── Lê os valores ──────────────────────────────────────────
+      p.pct       = Math.min(100, Math.max(0, parseInt(pctEl.value)||0));
+      p.atividade = atvEl.value.trim();
+      var oc      = ocEl.value.trim();
+
+      if(oc){
+        p.ocorrencias = p.ocorrencias || [];
+        p.ocorrencias.push(new Date().toLocaleDateString('pt-BR') + ' — ' + oc);
+        if(!silencioso) ocEl.value = ''; // Limpa só em salvamento manual
+      }
+
+      // ── Recalcula % geral da obra ──────────────────────────────
+      if(obra.prestadores.length){
+        obra.pct = Math.round(
+          obra.prestadores.reduce(function(a, pr){ return a + (pr.pct||0); }, 0)
+          / obra.prestadores.length
+        );
+      }
+
+      // ── Persiste localmente ────────────────────────────────────
+      saveLocal();
+
+      // ── Envia ao Google Sheets ─────────────────────────────────
+      p.ultimaAtualizacao = new Date().toLocaleDateString('pt-BR');
+
+      enviarSheets({
+        tipo:              'prestador',
+        unidade:           state.unit,
+        obra:              obra.nome,
+        nome:              p.nome,
+        doc:               p.doc      || '',
+        contato:           p.contato  || '',
+        servico:           p.servico  || '',
+        valor:             p.valor    || 0,
+        rt:                p.rt       || '',
+        pct:               p.pct,
+        ultimaAtualizacao: p.ultimaAtualizacao,
+        obs:               p.obs      || '',
+        ocorrencias:       JSON.stringify(p.ocorrencias||[])
+      });
+
+      enviarSheets({
+        tipo:      'atualizacao',
+        id:        String(obra.id),
+        unidade:   state.unit,
+        pct:       obra.pct,
+        status:    obra.status    || '',
+        atividade: obra.atividade || ''
+      });
+
+      pausarSync(20000);
+
+      // ── Atualiza visual SEM re-renderizar o DOM ────────────────
+      // (re-renderizar apagaria o que o usuário está digitando)
+      var form = document.getElementById('pu-' + obraId + '-' + prestIdx);
+      if(form){
+        var card = form.closest('.prest-acomp-card');
+        if(card){
+          var pctDisp = card.querySelector('.prest-acomp-pct');
+          if(pctDisp) pctDisp.textContent = p.pct + '%';
+          var pbar = card.querySelector('.pfill');
+          if(pbar) pbar.style.width = p.pct + '%';
+        }
+      }
+      // Insere a nova ocorrência na lista visível imediatamente (sem esperar re-render)
+      if(oc){
+        var histWrap = document.getElementById('ph-' + obraId + '-' + prestIdx);
+        if(histWrap){
+          var histList = histWrap.querySelector('.prest-hist-list');
+          if(histList){
+            histWrap.style.display = '';
+            var entry = document.createElement('div');
+            entry.className = 'log-entry';
+            var dot = document.createElement('div');
+            dot.className = 'log-dot';
+            dot.style.background = 'var(--info)';
+            var txtWrap = document.createElement('div');
+            var txt = document.createElement('div');
+            txt.className = 'log-txt';
+            txt.textContent = p.ocorrencias[p.ocorrencias.length - 1];
+            txtWrap.appendChild(txt);
+            entry.appendChild(dot);
+            entry.appendChild(txtWrap);
+            histList.insertBefore(entry, histList.firstChild);
+          }
+        }
+      }
+
+      // ── Feedback ───────────────────────────────────────────────
+      if(!silencioso){
+        mostrarNotify('n-ok','ok','✅ Progresso salvo e sincronizado!');
+      } else {
+        setSyncStatus('💾 Autosalvo · ' + new Date().toLocaleTimeString('pt-BR'));
+      }
+    };
+
+    // ═══════════════════════════════════════════════════════════════
+    //  PATCH 2 — agendarAutosave
+    //  Problema: indicador visual "Salvando..." usava querySelector
+    //  com aspas erradas, nunca encontrava o botão e o deixava preso
+    //  como desabilitado para sempre.
+    // ═══════════════════════════════════════════════════════════════
+    window.agendarAutosave = function(obraId, prestIdx){
+      obraId   = String(obraId);
+      prestIdx = parseInt(prestIdx);
+      var key  = obraId + '-' + prestIdx;
+      clearTimeout(_autoSaveTimers[key]);
+      // Sem indicador visual no autosave — evita botão preso em "Salvando..."
+      _autoSaveTimers[key] = setTimeout(function(){
+        salvarProgressoPrestador(obraId, prestIdx, true);
+      }, 3000);
+    };
+
+    console.log('[Unimed Obras] ✅ Patch v1.1 de salvamento de progresso aplicado!');
+  }
+
+  aplicar();
+})();
 </script>
 </body>
 </html>
