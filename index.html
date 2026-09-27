@@ -40,6 +40,13 @@ button{cursor:pointer}
 .nav-item.on{color:#fff;background:rgba(255,255,255,.1);border-left-color:var(--gb)}
 .nav-item .ni{font-size:16px;width:20px;text-align:center;opacity:.7}
 .nav-item.on .ni{opacity:1}
+.nav-grp.on{background:rgba(255,255,255,.05)}
+.nav-sub{display:flex;align-items:center;gap:8px;padding:7px 20px 7px 46px;font-size:12px;font-weight:500;color:rgba(255,255,255,.55);border:none;background:none;width:100%;text-align:left;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.nav-sub:hover{color:#fff;background:rgba(255,255,255,.06)}
+.nav-sub.on{color:#fff;background:rgba(255,255,255,.12);border-left-color:var(--gb);font-weight:600}
+.nav-sub .ns-ic{font-size:11px;width:14px;text-align:center}
+.nav-sub .ns-cnt{margin-left:auto;background:rgba(255,255,255,.14);border-radius:20px;padding:0 7px;font-size:10px;font-weight:700;min-width:20px;text-align:center}
+.nav-sub.on .ns-cnt{background:var(--gb);color:var(--gd)}
 
 .nav-label.units{padding-top:10px}
 .unit-item{display:flex;align-items:center;gap:10px;padding:8px 20px 8px 24px;font-size:12px;font-weight:400;color:rgba(255,255,255,.55);border:none;background:none;width:100%;text-align:left;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
@@ -293,7 +300,8 @@ tbody tr:hover td{background:#F9FAFB}
 }
 @media(max-width:860px){
   .sb{width:56px}.main{margin-left:56px}
-  .sb-brand,.sb-sub,.nav-item span,.unit-item span,.sb-url-box,.sync-st,.nav-label{display:none}
+  .sb-brand,.sb-sub,.nav-item span:not(.ni),.unit-item span,.sb-url-box,.sync-st,.nav-label,.nav-sub .ns-lbl,.nav-sub .ns-cnt{display:none}
+  .nav-sub{justify-content:center;padding:6px}
   .nav-item,.unit-item{justify-content:center;padding:12px}
   .obra-card{grid-template-columns:1fr auto auto}
   .form-g,.form-g3{grid-template-columns:1fr}
@@ -321,8 +329,12 @@ tbody tr:hover td{background:#F9FAFB}
   <div class="nav-label">Menu</div>
   <button class="nav-item on" onclick="navMenu('dashboard',this)"><span class="ni">📊</span><span>Dashboard</span></button>
   <button class="nav-item" onclick="navMenu('cadastrar',this)"><span class="ni">📋</span><span>Cadastrar obra</span></button>
-  <button class="nav-item" onclick="navMenu('atualizar',this)"><span class="ni">🔄</span><span>Acompanhamento</span></button>
-  <button class="nav-item" onclick="navMenu('orcamentos',this)"><span class="ni">💰</span><span>Orçamentos</span></button>
+  <button class="nav-item nav-grp" data-pg="atualizar" onclick="navMenu('atualizar',this)"><span class="ni">🔄</span><span>Acompanhamento</span></button>
+  <button class="nav-sub" data-pg="atualizar" data-sub="andamento" onclick="navSub('atualizar','andamento')" title="Obras em andamento"><span class="ns-ic">🚧</span><span class="ns-lbl">Em andamento</span><span class="ns-cnt" id="nav-cnt-andamento">0</span></button>
+  <button class="nav-sub" data-pg="atualizar" data-sub="finalizadas" onclick="navSub('atualizar','finalizadas')" title="Obras finalizadas"><span class="ns-ic">🏁</span><span class="ns-lbl">Finalizadas</span><span class="ns-cnt" id="nav-cnt-finalizadas">0</span></button>
+  <button class="nav-item nav-grp" data-pg="orcamentos" onclick="navMenu('orcamentos',this)"><span class="ni">💰</span><span>Orçamentos</span></button>
+  <button class="nav-sub" data-pg="orcamentos" data-sub="pend" onclick="navSub('orcamentos','pend')" title="Orçamentos em cotação"><span class="ns-ic">🕒</span><span class="ns-lbl">Em cotação</span><span class="ns-cnt" id="nav-cnt-pend">0</span></button>
+  <button class="nav-sub" data-pg="orcamentos" data-sub="aprov" onclick="navSub('orcamentos','aprov')" title="Orçamentos aprovados"><span class="ns-ic">✅</span><span class="ns-lbl">Aprovados</span><span class="ns-cnt" id="nav-cnt-aprov">0</span></button>
 
   <div class="nav-label units">Unidades</div>
   <button class="unit-item on" onclick="selUnit('Matriz',this)"><div class="unit-dot"></div><span>Matriz</span></button>
@@ -455,7 +467,7 @@ tbody tr:hover td{background:#F9FAFB}
       <div class="unit-header">
         <div>
           <div class="uh-name" id="uh-name-upd">Matriz</div>
-          <div class="uh-sub">Acompanhe e atualize o progresso das obras</div>
+          <div class="uh-sub" id="uh-sub-upd">Acompanhe e atualize o progresso das obras</div>
         </div>
         <div class="uh-stat">
           <div class="uh-stat-v" id="uh-pct-upd">–</div>
@@ -467,6 +479,10 @@ tbody tr:hover td{background:#F9FAFB}
           <div style="font-size:32px;margin-bottom:10px">🔄</div>
           <div>Cadastre obras primeiro na aba <strong>Cadastrar obra</strong>.</div>
         </div>
+      </div>
+      <div class="orc-tabs" id="acomp-tabs">
+        <button class="orc-tab on" id="acomp-tab-andamento" onclick="setAcompTab('andamento')">🚧 Em andamento <span class="cnt" id="acomp-cnt-andamento">0</span></button>
+        <button class="orc-tab" id="acomp-tab-finalizadas" onclick="setAcompTab('finalizadas')">🏁 Finalizadas <span class="cnt" id="acomp-cnt-finalizadas">0</span></button>
       </div>
       <div id="acomp-lista"></div>
     </div>
@@ -999,10 +1015,42 @@ function navMenu(pg, el){
   state.menu = pg;
   document.querySelectorAll('.pg').forEach(function(x){ x.classList.remove('on'); });
   document.getElementById('pg-'+pg).classList.add('on');
-  document.querySelectorAll('.nav-item').forEach(function(x){ x.classList.remove('on'); });
-  if(el) el.classList.add('on');
   document.getElementById('tp-t').textContent = menuTitles[pg]||pg;
+  _syncNavUI();
   renderPage();
+}
+// Subgrupos do menu: Acompanhamento (andamento/finalizadas) e Orçamentos (pend/aprov)
+function navSub(pg, sub){
+  if(pg==='atualizar') _acompTab = sub; else if(pg==='orcamentos') _orcTab = sub;
+  if(state.menu !== pg) navMenu(pg);
+  else if(pg==='atualizar') setAcompTab(sub); else setOrcTab(sub);
+}
+function _syncNavUI(){
+  var subAtual = state.menu==='atualizar' ? _acompTab : state.menu==='orcamentos' ? _orcTab : '';
+  document.querySelectorAll('.nav-item').forEach(function(x){
+    var pg = x.getAttribute('data-pg');
+    x.classList.toggle('on', pg ? pg===state.menu : (x.getAttribute('onclick')||'').indexOf("'"+state.menu+"'")>=0);
+  });
+  document.querySelectorAll('.nav-sub').forEach(function(x){
+    x.classList.toggle('on', x.getAttribute('data-pg')===state.menu && x.getAttribute('data-sub')===subAtual);
+  });
+  var t = document.getElementById('tp-t');
+  if(t && subAtual){
+    var nomes = {andamento:'Em andamento', finalizadas:'Finalizadas', pend:'Em cotação', aprov:'Aprovados'};
+    t.textContent = (menuTitles[state.menu]||state.menu)+' › '+nomes[subAtual];
+  }
+}
+function _obraFinalizada(o){ return String(o.status||'').trim()==='Concluída'; }
+function _atualizarContadoresNav(){
+  var obras = state.obras[state.unit]||[];
+  var fin = obras.filter(_obraFinalizada).length;
+  var orcs = state.orcs[state.unit]||[];
+  var cls = _classificarOrcs(orcs);
+  var cnt = { andamento: obras.length-fin, finalizadas: fin,
+              pend: cls.pend.length, aprov: cls.aprov.filter(function(o){ return o.aprovado; }).length };
+  Object.keys(cnt).forEach(function(k){
+    ['nav-cnt-','acomp-cnt-','orc-cnt-'].forEach(function(pre){ var el=document.getElementById(pre+k); if(el) el.textContent = cnt[k]; });
+  });
 }
 
 function selUnit(nome, el){
@@ -1025,6 +1073,8 @@ function renderPage(){
   if(state.menu === 'atualizar') renderAcompanhamento();
   if(state.menu === 'orcamentos') renderOrcamentos();
   atualizarSelects();
+  _atualizarContadoresNav();
+  _syncNavUI();
 }
 
 // ── HELPERS ───────────────────────────────────────────────────────
@@ -1782,12 +1832,33 @@ function salvarEdicaoObra(){
 }
 
 // ── ACOMPANHAMENTO ────────────────────────────────────────────────
+var _acompTab = 'andamento';
+function setAcompTab(t){
+  _acompTab = t;
+  document.getElementById('acomp-tab-andamento').classList.toggle('on', t==='andamento');
+  document.getElementById('acomp-tab-finalizadas').classList.toggle('on', t==='finalizadas');
+  _syncNavUI();
+  renderAcompanhamento();
+}
 function renderAcompanhamento(){
-  var obras = state.obras[state.unit]||[];
+  var todasObras = state.obras[state.unit]||[];
   var container = document.getElementById('acomp-lista');
   var emptyMsg  = document.getElementById('upd-empty-msg');
-  if(!obras.length){ emptyMsg.style.display='block'; container.innerHTML=''; document.getElementById('uh-pct-upd').textContent='—'; return; }
-  emptyMsg.style.display='none';
+  var tabs = document.getElementById('acomp-tabs');
+  _atualizarContadoresNav();
+  ['andamento','finalizadas'].forEach(function(k){ var b=document.getElementById('acomp-tab-'+k); if(b) b.classList.toggle('on', _acompTab===k); });
+  var sub = document.getElementById('uh-sub-upd');
+  if(sub) sub.textContent = _acompTab==='finalizadas' ? 'Obras finalizadas (status Concluída) — histórico' : 'Acompanhe e atualize o progresso das obras em andamento';
+  if(!todasObras.length){ emptyMsg.style.display='block'; if(tabs) tabs.style.display='none'; container.innerHTML=''; document.getElementById('uh-pct-upd').textContent='—'; return; }
+  emptyMsg.style.display='none'; if(tabs) tabs.style.display='';
+  var obras = todasObras.filter(function(o){ return _acompTab==='finalizadas' ? _obraFinalizada(o) : !_obraFinalizada(o); });
+  if(!obras.length){
+    document.getElementById('uh-pct-upd').textContent='—';
+    container.innerHTML = '<div class="card" style="text-align:center;padding:36px;color:var(--txt3)"><div style="font-size:28px;margin-bottom:8px">'+(_acompTab==='finalizadas'?'🏁':'🚧')+'</div><div>'
+      + (_acompTab==='finalizadas' ? 'Nenhuma obra finalizada ainda. Ao mudar o status de uma obra para <strong>Concluída</strong> ela vem para cá.' : 'Nenhuma obra em andamento. Todas estão em <strong>Finalizadas</strong>.')
+      + '</div></div>';
+    return;
+  }
   var total = obras.reduce(function(a,o){ return a+(o.pct||0); },0);
   document.getElementById('uh-pct-upd').textContent = Math.round(total/obras.length)+'%';
 
@@ -2361,6 +2432,7 @@ function setOrcTab(t){
   _orcTab = t;
   document.getElementById('orc-tab-pend').classList.toggle('on', t==='pend');
   document.getElementById('orc-tab-aprov').classList.toggle('on', t==='aprov');
+  _syncNavUI();
   renderOrcamentos();
 }
 function escH(s){
@@ -2464,6 +2536,8 @@ function renderOrcamentos(){
   document.getElementById('uh-orc-count').textContent = cls.pend.length;
   document.getElementById('orc-cnt-pend').textContent = cls.pend.length;
   document.getElementById('orc-cnt-aprov').textContent = nAprov;
+  ['pend','aprov'].forEach(function(k){ var b=document.getElementById('orc-tab-'+k); if(b) b.classList.toggle('on', _orcTab===k); });
+  _atualizarContadoresNav();
   var lista = document.getElementById('orc-obras-lista');
 
   var q = ((document.getElementById('orc-busca')||{}).value||'').trim().toLowerCase();
@@ -2681,8 +2755,8 @@ function reabrirOrcId(id){
   if(!confirm('Reabrir a cotação de "'+(orc.segmento||'Geral')+'"?\nA aprovação de '+(orc.empresa||'')+' será desfeita e o orçamento volta para "Em cotação".\nObs.: o prestador já cadastrado na obra NÃO é removido automaticamente.')) return;
   orc.aprovado = false; orc.aprovadoEm = ''; orc.aprovadoData = '';
   pausarSync(30000); saveLocal();
-  enviarSheets(Object.assign({tipo:'orcamento', unidade:state.unit}, orc, {aprovado:'Não', arquivos:_orcArqStr(orc)}));
-  _orcTab = 'pend'; setOrcTab('pend');
+  enviarSheets(Object.assign({tipo:'orcamento', unidade:state.unit}, orc, {aprovado:false, aprovadoEm:'', aprovadoData:'', arquivos:_orcArqStr(orc)}));
+  setOrcTab('pend');
   mostrarNotify('n-ok','ok','↩ Cotação reaberta.');
 }
 function excluirOrcId(id){
@@ -2865,7 +2939,7 @@ function enviarSheets(dados, cb){
     }
     delete d.arquivosLinks; // não envia array bruto
     // Garante aprovado como string
-    d.aprovado = d.aprovado ? 'true' : 'false';
+    d.aprovado = (d.aprovado===true || /^(true|sim|s)$/i.test(String(d.aprovado||''))) ? 'true' : 'false';
     // Garante id como string
     if(d.id) d.id = String(d.id);
   }
