@@ -47,6 +47,9 @@ button{cursor:pointer}
 .nav-sub .ns-ic{font-size:11px;width:14px;text-align:center}
 .nav-sub .ns-cnt{margin-left:auto;background:rgba(255,255,255,.14);border-radius:20px;padding:0 7px;font-size:10px;font-weight:700;min-width:20px;text-align:center}
 .nav-sub.on .ns-cnt{background:var(--gb);color:var(--gd)}
+.acomp-status-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:9px 14px;margin-bottom:14px}
+.acomp-status-bar label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--txt3);letter-spacing:.04em}
+.acomp-status-bar select{font-size:13px;border:1px solid var(--border2);border-radius:8px;padding:6px 10px;background:#fff;color:var(--txt)}
 
 .nav-label.units{padding-top:10px}
 .unit-item{display:flex;align-items:center;gap:10px;padding:8px 20px 8px 24px;font-size:12px;font-weight:400;color:rgba(255,255,255,.55);border:none;background:none;width:100%;text-align:left;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
@@ -334,7 +337,8 @@ tbody tr:hover td{background:#F9FAFB}
   <button class="nav-sub" data-pg="atualizar" data-sub="finalizadas" onclick="navSub('atualizar','finalizadas')" title="Obras finalizadas"><span class="ns-ic">🏁</span><span class="ns-lbl">Finalizadas</span><span class="ns-cnt" id="nav-cnt-finalizadas">0</span></button>
   <button class="nav-item nav-grp" data-pg="orcamentos" onclick="navMenu('orcamentos',this)"><span class="ni">💰</span><span>Orçamentos</span></button>
   <button class="nav-sub" data-pg="orcamentos" data-sub="pend" onclick="navSub('orcamentos','pend')" title="Orçamentos em cotação"><span class="ns-ic">🕒</span><span class="ns-lbl">Em cotação</span><span class="ns-cnt" id="nav-cnt-pend">0</span></button>
-  <button class="nav-sub" data-pg="orcamentos" data-sub="aprov" onclick="navSub('orcamentos','aprov')" title="Orçamentos aprovados"><span class="ns-ic">✅</span><span class="ns-lbl">Aprovados</span><span class="ns-cnt" id="nav-cnt-aprov">0</span></button>
+  <button class="nav-sub" data-pg="orcamentos" data-sub="aprov" onclick="navSub('orcamentos','aprov')" title="Aprovados — obra em execução"><span class="ns-ic">✅</span><span class="ns-lbl">Aprovados</span><span class="ns-cnt" id="nav-cnt-aprov">0</span></button>
+  <button class="nav-sub" data-pg="orcamentos" data-sub="exec" onclick="navSub('orcamentos','exec')" title="Executados — obra concluída"><span class="ns-ic">🏁</span><span class="ns-lbl">Executados</span><span class="ns-cnt" id="nav-cnt-exec">0</span></button>
 
   <div class="nav-label units">Unidades</div>
   <button class="unit-item on" onclick="selUnit('Matriz',this)"><div class="unit-dot"></div><span>Matriz</span></button>
@@ -552,6 +556,7 @@ tbody tr:hover td{background:#F9FAFB}
       <div class="orc-tabs">
         <button class="orc-tab on" id="orc-tab-pend" onclick="setOrcTab('pend')">🕒 Em cotação <span class="cnt" id="orc-cnt-pend">0</span></button>
         <button class="orc-tab" id="orc-tab-aprov" onclick="setOrcTab('aprov')">✅ Aprovados <span class="cnt" id="orc-cnt-aprov">0</span></button>
+        <button class="orc-tab" id="orc-tab-exec" onclick="setOrcTab('exec')">🏁 Executados <span class="cnt" id="orc-cnt-exec">0</span></button>
         <input type="search" class="orc-busca" id="orc-busca" placeholder="🔎 Buscar obra, empresa ou segmento..." oninput="renderOrcamentos()">
       </div>
 
@@ -863,6 +868,15 @@ function parseOcorrenciasGs(v){
 }
 
 // Sanitiza obras vindas do servidor (converte campos que podem chegar como Date)
+var STATUS_OBRA = ['Planejada','Em licitação','Em cotação','Aguardando aprovação','Em execução','Paralisada','Concluída'];
+function _normSt(s){ return String(s||'').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
+function statusCanonico(s){
+  var n = _normSt(s);
+  if(!n) return 'Planejada';
+  if(/^(concluid[ao]|finalizad[ao]|encerrad[ao]|executad[ao])$/.test(n)) return 'Concluída';
+  var hit = STATUS_OBRA.find(function(x){ return _normSt(x)===n; });
+  return hit || String(s).trim();
+}
 function sanitizarObras(obrasRaw){
   Object.keys(obrasRaw).forEach(function(u){
     (obrasRaw[u]||[]).forEach(function(o){
@@ -870,6 +884,7 @@ function sanitizarObras(obrasRaw){
       o.prazo       = strData(o.prazo);
       o.atividade   = String(o.atividade||'');
       o.pct         = parseFloat(o.pct)||0;
+      o.status      = statusCanonico(o.status);
       o.ocorrencias = parseOcorrenciasGs(o.ocorrencias);
       (o.prestadores||[]).forEach(function(p){
         p.atividade          = String(p.atividade||'');
@@ -1036,18 +1051,19 @@ function _syncNavUI(){
   });
   var t = document.getElementById('tp-t');
   if(t && subAtual){
-    var nomes = {andamento:'Em andamento', finalizadas:'Finalizadas', pend:'Em cotação', aprov:'Aprovados'};
+    var nomes = {andamento:'Em andamento', finalizadas:'Finalizadas', pend:'Em cotação', aprov:'Aprovados', exec:'Executados'};
     t.textContent = (menuTitles[state.menu]||state.menu)+' › '+nomes[subAtual];
   }
 }
-function _obraFinalizada(o){ return String(o.status||'').trim()==='Concluída'; }
+function _obraFinalizada(o){ return !!o && statusCanonico(o.status)==='Concluída'; }
 function _atualizarContadoresNav(){
   var obras = state.obras[state.unit]||[];
   var fin = obras.filter(_obraFinalizada).length;
   var orcs = state.orcs[state.unit]||[];
   var cls = _classificarOrcs(orcs);
   var cnt = { andamento: obras.length-fin, finalizadas: fin,
-              pend: cls.pend.length, aprov: cls.aprov.filter(function(o){ return o.aprovado; }).length };
+              pend: cls.pend.length, aprov: cls.aprov.filter(function(o){ return o.aprovado; }).length,
+              exec: cls.exec.filter(function(o){ return o.aprovado; }).length };
   Object.keys(cnt).forEach(function(k){
     ['nav-cnt-','acomp-cnt-','orc-cnt-'].forEach(function(pre){ var el=document.getElementById(pre+k); if(el) el.textContent = cnt[k]; });
   });
@@ -1895,6 +1911,16 @@ function renderAcompanhamento(){
       </div>
 
       <div class="acomp-body" id="ac-${o.id}">
+        <!-- Status da obra -->
+        <div class="acomp-status-bar">
+          <label>Status da obra</label>
+          <select id="st-${o.id}" onchange="alterarStatusObra('${o.id}', this.value)">
+            ${STATUS_OBRA.concat(STATUS_OBRA.indexOf(o.status)<0&&o.status?[o.status]:[]).map(function(st){ return '<option'+(st===o.status?' selected':'')+'>'+st+'</option>'; }).join('')}
+          </select>
+          ${_obraFinalizada(o)
+            ? `<button class="btn-s" onclick="alterarStatusObra('${o.id}','Em execução')">↩ Reabrir obra</button><span style="font-size:11px;color:var(--txt3)">Finalizada — aparece em <b>Finalizadas</b></span>`
+            : `<button class="btn-sm-g" onclick="concluirObra('${o.id}')">🏁 Concluir obra</button>${pctObra(o)>=100?'<span class="bdg bdg-o" style="font-size:10px">100% — pronta para concluir</span>':''}`}
+        </div>
         <!-- Custo resumo -->
         <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px">
           <div style="background:var(--gl);border:1px solid var(--gb);border-radius:9px;padding:8px 14px;font-size:12px">
@@ -2008,6 +2034,29 @@ function renderAcompanhamento(){
     var dt = document.getElementById('dt-'+o.id);
     if(dt && !dt.value) dt.value = hoje;
   });
+}
+
+// Altera status da obra (move entre Em andamento / Finalizadas)
+function alterarStatusObra(id, status){
+  var obra = encontrarObra(id); if(!obra) return;
+  var antes = _obraFinalizada(obra);
+  obra.status = statusCanonico(status);
+  if(obra.status==='Concluída'){ obra.pct = 100; obra.dataConclusao = obra.dataConclusao || new Date().toLocaleDateString('pt-BR'); }
+  saveLocal();
+  pausarSync(30000);
+  enviarSheets({tipo:'atualizacao', id:id, unidade:state.unit, pct:obra.pct, status:obra.status, atividade:obra.atividade||'', ocorrencias: JSON.stringify(obra.ocorrencias||[])});
+  enviarSheets(obraParaSheets(obra)); // garante gravação mesmo se a linha for localizada por nome
+  var depois = _obraFinalizada(obra);
+  if(antes!==depois) mostrarNotify('n-ok','ok', depois ? '🏁 "'+obra.nome+'" concluída e movida para Finalizadas.' : '↩ "'+obra.nome+'" reaberta e movida para Em andamento.');
+  else mostrarNotify('n-ok','ok','✅ Status atualizado: '+obra.status);
+  renderAcompanhamento();
+  _atualizarContadoresNav();
+}
+function concluirObra(id){
+  var obra = encontrarObra(id); if(!obra) return;
+  var pend = (obra.prestadores||[]).filter(function(p){ return (p.pct||0) < 100; }).length;
+  if(!confirm('Concluir a obra "'+obra.nome+'"?'+(pend?'\n⚠ '+pend+' prestador(es) ainda abaixo de 100%.':'')+'\nEla irá para Acompanhamento › Finalizadas e os orçamentos dela para Orçamentos › Executados.')) return;
+  alterarStatusObra(id, 'Concluída');
 }
 
 function toggleAcomp(id){
@@ -2292,8 +2341,8 @@ function salvarProgresso(id){
   var stEl  = document.getElementById('st-'+id);
   var atvEl = document.getElementById('atv-'+id);
   obra.pct = Math.min(100, Math.max(0, parseInt(pctEl.value)||0));
-  obra.status = stEl.value;
-  obra.atividade = atvEl.value.trim();
+  if(stEl) obra.status = stEl.value;
+  if(atvEl) obra.atividade = atvEl.value.trim();
   saveLocal();
   pausarSync(20000);
   enviarSheets({tipo:'atualizacao', id:id, unidade:state.unit, pct:obra.pct, status:obra.status, atividade:obra.atividade, ocorrencias: JSON.stringify(obra.ocorrencias||[])});
@@ -2432,6 +2481,7 @@ function setOrcTab(t){
   _orcTab = t;
   document.getElementById('orc-tab-pend').classList.toggle('on', t==='pend');
   document.getElementById('orc-tab-aprov').classList.toggle('on', t==='aprov');
+  document.getElementById('orc-tab-exec').classList.toggle('on', t==='exec');
   _syncNavUI();
   renderOrcamentos();
 }
@@ -2477,7 +2527,12 @@ function _classificarOrcs(orcs){
       else { o._concorrente = true; aprov.push(o); }   // proposta da rodada encerrada
     });
   });
-  return {pend:pend, aprov:aprov};
+  var obrasU = state.obras[state.unit]||[];
+  var concl = {};
+  obrasU.forEach(function(ob){ if(_obraFinalizada(ob)) concl[ob.nome] = true; });
+  var exec = aprov.filter(function(o){ return concl[o.obra]; });
+  aprov = aprov.filter(function(o){ return !concl[o.obra]; });
+  return {pend:pend, aprov:aprov, exec:exec};
 }
 function _agruparObraSeg(orcs){
   var by = {};
@@ -2536,23 +2591,24 @@ function renderOrcamentos(){
   document.getElementById('uh-orc-count').textContent = cls.pend.length;
   document.getElementById('orc-cnt-pend').textContent = cls.pend.length;
   document.getElementById('orc-cnt-aprov').textContent = nAprov;
-  ['pend','aprov'].forEach(function(k){ var b=document.getElementById('orc-tab-'+k); if(b) b.classList.toggle('on', _orcTab===k); });
+  ['pend','aprov','exec'].forEach(function(k){ var b=document.getElementById('orc-tab-'+k); if(b) b.classList.toggle('on', _orcTab===k); });
   _atualizarContadoresNav();
   var lista = document.getElementById('orc-obras-lista');
 
   var q = ((document.getElementById('orc-busca')||{}).value||'').trim().toLowerCase();
-  var base = (_orcTab==='aprov' ? cls.aprov : cls.pend).filter(function(o){
+  var base = (_orcTab==='aprov' ? cls.aprov : _orcTab==='exec' ? cls.exec : cls.pend).filter(function(o){
     return !q || [o.obra,o.empresa,o.segmento,o.cnpj].join(' ').toLowerCase().indexOf(q) >= 0;
   });
 
   if(!base.length){
     var msg = q ? 'Nenhum orçamento encontrado para "'+escH(q)+'".'
-      : _orcTab==='aprov' ? 'Nenhum orçamento aprovado ainda. Ao aprovar uma proposta ela é vinculada à obra e movida para cá.'
+      : _orcTab==='aprov' ? 'Nenhum orçamento aprovado em obra em execução. Ao aprovar uma proposta ela é vinculada à obra e movida para cá.'
+      : _orcTab==='exec' ? 'Nenhum orçamento executado ainda. Quando a obra for concluída (Acompanhamento › 🏁 Concluir obra) os orçamentos aprovados dela vêm para cá.'
       : (todos.length ? 'Nenhuma cotação em aberto. Todas as propostas foram concluídas — veja a aba <strong>Aprovados</strong>.' : 'Nenhum orçamento cadastrado para esta unidade. Preencha o formulário acima.');
-    lista.innerHTML = '<div class="card" style="text-align:center;padding:36px;color:var(--txt3)"><div style="font-size:28px;margin-bottom:8px">'+(_orcTab==='aprov'?'✅':'💰')+'</div><div>'+msg+'</div></div>';
+    lista.innerHTML = '<div class="card" style="text-align:center;padding:36px;color:var(--txt3)"><div style="font-size:28px;margin-bottom:8px">'+({aprov:'✅',exec:'🏁'}[_orcTab]||'💰')+'</div><div>'+msg+'</div></div>';
     return;
   }
-  lista.innerHTML = _orcTab==='aprov' ? _renderAprovados(base) : _renderPendentes(base);
+  lista.innerHTML = _orcTab==='pend' ? _renderPendentes(base) : _renderAprovados(base, _orcTab==='exec');
   _restaurarEstadoOrc(_estadoOrc);
 }
 
@@ -2619,7 +2675,7 @@ function _renderPendentes(orcs){
   return html;
 }
 
-function _renderAprovados(orcs){
+function _renderAprovados(orcs, executado){
   var byObra = _agruparObraSeg(orcs);
   var html = '';
   Object.keys(byObra).sort().forEach(function(obraNome, oi){
@@ -2629,14 +2685,14 @@ function _renderAprovados(orcs){
     Object.keys(segs).forEach(function(s){ aprovList = aprovList.concat(segs[s].filter(function(o){ return o.aprovado; })); });
     var totalAprov = aprovList.reduce(function(a,o){ return a+_orcVal(o); },0);
     html += `<div class="card" style="padding:0;overflow:hidden;margin-bottom:18px">
-      <div style="background:linear-gradient(135deg,#0F766E,#115E59);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div style="background:${executado?'linear-gradient(135deg,#475569,#334155)':'linear-gradient(135deg,#0F766E,#115E59)'};padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px">
         <div>
           <div style="font-size:15px;font-weight:700;color:#fff">🏗 ${escH(obraNome)} ${obra?`<span class="bdg ${badgeCls(obra.status)}" style="margin-left:6px;font-size:10px">${escH(obra.status||'—')}</span>`:'<span class="bdg bdg-r" style="margin-left:6px;font-size:10px">Obra não encontrada</span>'}</div>
           <div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:2px">${aprovList.length} contratado(s) · ${Object.keys(segs).length} segmento(s) concluído(s)</div>
         </div>
         <div style="text-align:right;color:#fff">
           <div style="font-size:20px;font-weight:700">${fmtValCompact(totalAprov)}</div>
-          <div style="font-size:10px;opacity:.7">total aprovado</div>
+          <div style="font-size:10px;opacity:.7">${executado?'total executado':'total aprovado'}</div>
         </div>
       </div>`;
     Object.keys(segs).forEach(function(segNome, si){
@@ -2653,7 +2709,7 @@ function _renderAprovados(orcs){
         html += `<div class="orc-card" style="margin-bottom:6px;background:var(--gl);border-color:var(--gb);cursor:default">
           <div class="orc-ini" style="background:#00843D">${escH(_orcIni(o))}</div>
           <div style="min-width:0;flex:1">
-            <div class="orc-n">${escH(o.empresa)} <span class="bdg bdg-g" style="font-size:10px">✅ Aprovado</span>
+            <div class="orc-n">${escH(o.empresa)} ${executado?'<span class="bdg bdg-gray" style="font-size:10px">🏁 Executado</span>':'<span class="bdg bdg-g" style="font-size:10px">✅ Aprovado</span>'}
               ${vin.vinculado?'<span class="bdg bdg-teal" style="font-size:10px">🔗 Vinculado à obra</span>':`<span class="bdg bdg-o" style="font-size:10px">⚠ Não vinculado</span>`}
               ${v===minSeg&&list.length>1?'<span class="bdg bdg-gray" style="font-size:10px">✦ Menor preço</span>':''}</div>
             <div class="orc-meta">
@@ -2671,7 +2727,7 @@ function _renderAprovados(orcs){
             <div class="orc-v" style="color:var(--g)">${fmtVal(v)}</div>
             <div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end;flex-wrap:wrap">
               ${!vin.vinculado&&vin.obra?`<button class="btn-sm-g" style="padding:5px 10px;font-size:11px" onclick="vincularOrcId('${o.id}')">🔗 Vincular</button>`:''}
-              <button class="btn-s" style="padding:5px 10px;font-size:11px" onclick="reabrirOrcId('${o.id}')" title="Desfaz a aprovação e devolve o segmento para Em cotação">↩ Reabrir</button>
+              ${executado?'':`<button class="btn-s" style="padding:5px 10px;font-size:11px" onclick="reabrirOrcId('${o.id}')" title="Desfaz a aprovação e devolve o segmento para Em cotação">↩ Reabrir</button>`}
               <button class="btn-danger" style="padding:5px 10px;font-size:11px" onclick="excluirOrcId('${o.id}')">🗑</button>
             </div>
           </div>
