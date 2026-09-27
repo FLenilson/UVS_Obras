@@ -149,6 +149,20 @@ tbody tr:hover td{background:#F9FAFB}
 
 .orc-card{display:grid;grid-template-columns:48px 1fr auto;gap:14px;align-items:center;padding:14px 18px;border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;cursor:pointer;transition:all .2s;background:#fff}
 .orc-card:hover{border-color:var(--gb)}
+.orc-tabs{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:4px 0 14px;border-bottom:2px solid var(--border)}
+.orc-tab{background:none;border:none;border-bottom:3px solid transparent;margin-bottom:-2px;padding:10px 16px;font:600 13px 'DM Sans',sans-serif;color:var(--txt3);cursor:pointer;display:flex;align-items:center;gap:7px}
+.orc-tab:hover{color:var(--txt)}
+.orc-tab.on{color:var(--g);border-bottom-color:var(--g)}
+.orc-tab .cnt{background:var(--bg);color:var(--txt2);border-radius:20px;padding:1px 8px;font-size:11px}
+.orc-tab.on .cnt{background:var(--g);color:#fff}
+.orc-busca{margin-left:auto;padding:7px 12px;border:1px solid var(--border2);border-radius:8px;font:13px 'DM Sans',sans-serif;min-width:220px;margin-bottom:6px}
+.orc-perd{margin-top:6px;border:1px dashed var(--border2);border-radius:8px;padding:6px 12px;background:#fafbfc}
+.orc-perd summary{cursor:pointer;font-size:11px;color:var(--txt3);font-weight:600;padding:2px 0}
+.orc-perd-row{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--txt2);padding:5px 0;border-top:1px solid var(--border)}
+.orc-perd-row:first-of-type{border-top:none}
+.orc-meta{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px 14px;font-size:11px;color:var(--txt2);margin-top:6px}
+.orc-meta b{color:var(--txt3);font-weight:600;text-transform:uppercase;font-size:9.5px;display:block}
+@media(max-width:640px){.orc-busca{margin-left:0;min-width:0;width:100%}.orc-card{grid-template-columns:40px 1fr}.orc-card>div:last-child{grid-column:1/-1;text-align:left!important}}
 .orc-card.sel{border-color:var(--g);border-width:2px;background:var(--gl)}
 .orc-ini{width:44px;height:44px;border-radius:10px;background:var(--g);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff}
 .orc-n{font-weight:700;font-size:13px;color:var(--txt)}
@@ -468,7 +482,7 @@ tbody tr:hover td{background:#F9FAFB}
         </div>
         <div class="uh-stat">
           <div class="uh-stat-v" id="uh-orc-count">0</div>
-          <div class="uh-stat-l">orçamentos</div>
+          <div class="uh-stat-l">em cotação</div>
         </div>
       </div>
 
@@ -516,6 +530,13 @@ tbody tr:hover td{background:#F9FAFB}
           <button class="btn-g" onclick="addOrcamento()">+ Adicionar orçamento</button>
           <button class="btn-s" onclick="limparOrc()">🗑 Limpar</button>
         </div>
+      </div>
+
+      <!-- Abas: Em cotação / Aprovados -->
+      <div class="orc-tabs">
+        <button class="orc-tab on" id="orc-tab-pend" onclick="setOrcTab('pend')">🕒 Em cotação <span class="cnt" id="orc-cnt-pend">0</span></button>
+        <button class="orc-tab" id="orc-tab-aprov" onclick="setOrcTab('aprov')">✅ Aprovados <span class="cnt" id="orc-cnt-aprov">0</span></button>
+        <input type="search" class="orc-busca" id="orc-busca" placeholder="🔎 Buscar obra, empresa ou segmento..." oninput="renderOrcamentos()">
       </div>
 
       <!-- Lista por obra → segmento -->
@@ -957,6 +978,11 @@ function mergeEstadoRemoto(obrasRemote, orcsRemote){
       if(oLocal && oLocal.aprovado && !oRemoto.aprovado){
         // Local já foi aprovado mas servidor ainda não sincronizou: preserva aprovado
         oRemoto.aprovado = true;
+      }
+      // Preserva data de aprovação local (usada para separar a aba Aprovados)
+      if(oLocal && oRemoto.aprovado){
+        if(!oRemoto.aprovadoEm && oLocal.aprovadoEm) oRemoto.aprovadoEm = oLocal.aprovadoEm;
+        if(!oRemoto.aprovadoData && oLocal.aprovadoData) oRemoto.aprovadoData = oLocal.aprovadoData;
       }
       return oRemoto;
     });
@@ -2329,220 +2355,335 @@ function addOrcamento(){
   orcFilesData = [];
 }
 
+// ── ORÇAMENTOS: abas Em cotação / Aprovados ─────────────────────
+var _orcTab = 'pend';
+function setOrcTab(t){
+  _orcTab = t;
+  document.getElementById('orc-tab-pend').classList.toggle('on', t==='pend');
+  document.getElementById('orc-tab-aprov').classList.toggle('on', t==='aprov');
+  renderOrcamentos();
+}
+function escH(s){
+  return String(s==null?'':s).replace(/[&<>"']/g,function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; });
+}
+function _orcObraNome(o){ return (o.obra&&String(o.obra).indexOf('Selecione')<0)?String(o.obra):'(Sem obra)'; }
+function _orcVal(o){ var v=Number(o.valor); return isFinite(v)?v:0; }
+function _orcIni(o){ return String(o.empresa||'').split(' ').map(function(w){ return w[0]||''; }).join('').toUpperCase().slice(0,2)||'??'; }
+function _orcArqStr(orc){
+  return (orc.arquivosLinks||[]).length
+    ? orc.arquivosLinks.map(function(l){ return l.nome+': '+l.url; }).join('\n')
+    : (orc.arquivos||[]).join(',');
+}
+// Obra vinculada e se o fornecedor já consta como prestador
+function _orcVinculo(o){
+  var obra = (state.obras[state.unit]||[]).find(function(ob){ return ob.nome === o.obra; });
+  if(!obra) return {obra:null, vinculado:false};
+  var ok = !!(obra.prestadores||[]).find(function(p){ return p.nome === (o.empresa||'—') && (p.servico||'Geral') === (o.segmento||'Geral'); });
+  return {obra:obra, vinculado:ok};
+}
+
+/* Classifica orçamentos:
+   - Segmento (obra+segmento) sem aprovado → tudo "Em cotação"
+   - Segmento com aprovado → aprovado(s) + propostas concorrentes da mesma rodada vão para "Aprovados"
+   - Proposta criada DEPOIS da aprovação no mesmo segmento (nova cotação) → volta para "Em cotação" */
+function _classificarOrcs(orcs){
+  var grupos = {};
+  orcs.forEach(function(o){
+    var k = _orcObraNome(o)+'||'+(o.segmento||'Geral');
+    (grupos[k] = grupos[k]||[]).push(o);
+  });
+  var pend = [], aprov = [];
+  Object.keys(grupos).forEach(function(k){
+    var list = grupos[k];
+    var ap = list.filter(function(o){ return o.aprovado; });
+    if(!ap.length){ pend.push.apply(pend, list); return; }
+    var corte = Math.max.apply(null, ap.map(function(o){ var t=Number(o.aprovadoEm); return t>0?t:Infinity; }));
+    list.forEach(function(o){
+      if(o.aprovado){ aprov.push(o); return; }
+      var ts = Number(o.id);
+      if(isFinite(corte) && ts > corte) pend.push(o);   // nova cotação após aprovação
+      else { o._concorrente = true; aprov.push(o); }   // proposta da rodada encerrada
+    });
+  });
+  return {pend:pend, aprov:aprov};
+}
+function _agruparObraSeg(orcs){
+  var by = {};
+  orcs.forEach(function(o){
+    var ob = _orcObraNome(o), sg = o.segmento||'Geral';
+    by[ob] = by[ob]||{}; (by[ob][sg] = by[ob][sg]||[]).push(o);
+  });
+  return by;
+}
+
 function _salvarEstadoOrc(){
   var estado = { abertos:{}, campos:{} };
-  var lista = document.getElementById('orc-lista'); if(!lista) return estado;
-  lista.querySelectorAll('[id^="seg-"]').forEach(function(el){
-    if(el.style.display !== 'none') estado.abertos[el.id] = true;
-  });
+  var lista = document.getElementById('orc-obras-lista'); if(!lista) return estado;
+  lista.querySelectorAll('details[id]').forEach(function(el){ if(el.open) estado.abertos[el.id] = true; });
   lista.querySelectorAll('input[id], textarea[id], select[id]').forEach(function(el){
     if(el.value !== (el.defaultValue||'')) estado.campos[el.id] = el.value;
   });
   return estado;
 }
 function _restaurarEstadoOrc(estado){
-  Object.keys(estado.abertos||{}).forEach(function(id){
-    var el = document.getElementById(id); if(el) el.style.display = '';
-  });
-  Object.keys(estado.campos||{}).forEach(function(id){
-    var el = document.getElementById(id); if(el && !el.value) el.value = estado.campos[id];
-  });
+  Object.keys(estado.abertos||{}).forEach(function(id){ var el = document.getElementById(id); if(el) el.open = true; });
+  Object.keys(estado.campos||{}).forEach(function(id){ var el = document.getElementById(id); if(el && !el.value) el.value = estado.campos[id]; });
+}
+
+function _arquivosEditaveisHtml(o){
+  var h = '';
+  if(o.arquivosLinks&&o.arquivosLinks.length){
+    h = '<div style="margin-top:6px;display:flex;flex-direction:column;gap:4px">';
+    o.arquivosLinks.forEach(function(l,ai){
+      h += '<div style="display:flex;align-items:center;gap:6px;background:var(--gl);border-radius:6px;padding:4px 8px">'
+        +'<a href="'+escH(l.url)+'" target="_blank" rel="noopener" style="color:var(--info);font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px" title="'+escH(l.nome)+'">📄 '+escH(l.nome)+'</a>'
+        +'<button onclick="substituirArquivoOrc(\''+o.id+'\','+ai+')" style="background:none;border:1px solid var(--border2);border-radius:4px;padding:2px 7px;font-size:10px;color:var(--txt2);cursor:pointer" title="Substituir">↑</button>'
+        +'<button onclick="excluirArquivoOrc(\''+o.id+'\','+ai+')" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:2px 7px;font-size:10px;color:var(--err);cursor:pointer" title="Excluir arquivo">✕</button>'
+        +'</div>';
+    });
+    h += '</div>';
+  } else if(o.arquivos&&o.arquivos.length){
+    h = '<div style="font-size:11px;color:var(--txt3);margin-top:4px">📄 '+escH([].concat(o.arquivos).join(', '))+'</div>';
+  }
+  return h + '<div style="margin-top:4px"><label style="cursor:pointer;font-size:11px;color:var(--g);display:inline-flex;align-items:center;gap:4px">'
+    +'<input type="file" style="display:none" onchange="adicionarArquivoOrc(\''+o.id+'\', this)">＋ Anexar arquivo</label></div>';
+}
+function _arquivosLinksHtml(o){
+  if(o.arquivosLinks&&o.arquivosLinks.length)
+    return o.arquivosLinks.map(function(l){ return '<a href="'+escH(l.url)+'" target="_blank" rel="noopener" style="color:var(--info);font-size:11px;display:inline-flex;align-items:center;gap:4px;margin-right:10px">📄 '+escH(l.nome)+'</a>'; }).join('');
+  if(o.arquivos&&o.arquivos.length) return '<span style="font-size:11px;color:var(--txt3)">📄 '+escH([].concat(o.arquivos).join(', '))+'</span>';
+  return '<span style="font-size:11px;color:var(--txt3)">Sem arquivo anexado</span>';
 }
 
 function renderOrcamentos(){
   var _estadoOrc = _salvarEstadoOrc();
-  var orcs = state.orcs[state.unit]||[];
-  document.getElementById('uh-orc-count').textContent = orcs.length;
+  var todos = state.orcs[state.unit]||[];
+  todos.forEach(function(o){ delete o._concorrente; });
+  var cls = _classificarOrcs(todos);
+  var nAprov = cls.aprov.filter(function(o){ return o.aprovado; }).length;
+  document.getElementById('uh-orc-count').textContent = cls.pend.length;
+  document.getElementById('orc-cnt-pend').textContent = cls.pend.length;
+  document.getElementById('orc-cnt-aprov').textContent = nAprov;
   var lista = document.getElementById('orc-obras-lista');
-  if(!orcs.length){ lista.innerHTML='<div class="card" style="text-align:center;padding:36px;color:var(--txt3)"><div style="font-size:28px;margin-bottom:8px">💰</div><div>Nenhum orçamento cadastrado para esta unidade. Preencha o formulário acima.</div></div>'; return; }
 
-  // Agrupar: obra → segmento → [orçamentos]
-  var byObra = {};
-  orcs.forEach(function(o){
-    var obra = (o.obra&&!o.obra.includes('Selecione'))?o.obra:'(Sem obra)';
-    var seg  = o.segmento||'Geral';
-    if(!byObra[obra]) byObra[obra]={};
-    if(!byObra[obra][seg]) byObra[obra][seg]=[];
-    byObra[obra][seg].push(o);
+  var q = ((document.getElementById('orc-busca')||{}).value||'').trim().toLowerCase();
+  var base = (_orcTab==='aprov' ? cls.aprov : cls.pend).filter(function(o){
+    return !q || [o.obra,o.empresa,o.segmento,o.cnpj].join(' ').toLowerCase().indexOf(q) >= 0;
   });
 
+  if(!base.length){
+    var msg = q ? 'Nenhum orçamento encontrado para "'+escH(q)+'".'
+      : _orcTab==='aprov' ? 'Nenhum orçamento aprovado ainda. Ao aprovar uma proposta ela é vinculada à obra e movida para cá.'
+      : (todos.length ? 'Nenhuma cotação em aberto. Todas as propostas foram concluídas — veja a aba <strong>Aprovados</strong>.' : 'Nenhum orçamento cadastrado para esta unidade. Preencha o formulário acima.');
+    lista.innerHTML = '<div class="card" style="text-align:center;padding:36px;color:var(--txt3)"><div style="font-size:28px;margin-bottom:8px">'+(_orcTab==='aprov'?'✅':'💰')+'</div><div>'+msg+'</div></div>';
+    return;
+  }
+  lista.innerHTML = _orcTab==='aprov' ? _renderAprovados(base) : _renderPendentes(base);
+  _restaurarEstadoOrc(_estadoOrc);
+}
+
+function _renderPendentes(orcs){
+  var byObra = _agruparObraSeg(orcs);
   var colors = ['#00843D','#1D4ED8','#B45309','#7C3AED','#0F766E','#BE185D'];
   var html = '';
-
   Object.keys(byObra).forEach(function(obraNome){
     var segs = byObra[obraNome];
     var totalOrcs = Object.keys(segs).reduce(function(a,s){ return a+segs[s].length; },0);
-    var aprovados = Object.keys(segs).reduce(function(a,s){ return a+segs[s].filter(function(o){ return o.aprovado; }).length; },0);
-    // Total = soma do menor valor (ou aprovado) por segmento — não soma todos os fornecedores
-    var totalObra = Object.keys(segs).reduce(function(a,s){
-      var list = segs[s];
-      var aprovado = list.find(function(o){ return o.aprovado; });
-      if(aprovado) return a + aprovado.valor;
-      return a + Math.min.apply(null, list.map(function(o){ return o.valor; }));
-    }, 0);
-
+    // Total = soma do menor valor por segmento — não soma todos os fornecedores
+    var totalObra = Object.keys(segs).reduce(function(a,s){ return a + Math.min.apply(null, segs[s].map(_orcVal)); }, 0);
     html += `<div class="card" style="padding:0;overflow:hidden;margin-bottom:18px">
-      <div style="background:linear-gradient(135deg,var(--gd),var(--g2));padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+      <div style="background:linear-gradient(135deg,var(--gd),var(--g2));padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px">
         <div>
-          <div style="font-size:15px;font-weight:700;color:#fff">🏗 ${obraNome}</div>
-          <div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:2px">${totalOrcs} proposta(s) · ${Object.keys(segs).length} segmento(s) · ${aprovados} aprovado(s)</div>
+          <div style="font-size:15px;font-weight:700;color:#fff">🏗 ${escH(obraNome)}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.65);margin-top:2px">${totalOrcs} proposta(s) · ${Object.keys(segs).length} segmento(s) em cotação</div>
         </div>
         <div style="text-align:right;color:#fff">
           <div style="font-size:20px;font-weight:700">${fmtValCompact(totalObra)}</div>
-          <div style="font-size:10px;opacity:.6">total cotado</div>
+          <div style="font-size:10px;opacity:.6">menor cotado</div>
         </div>
       </div>`;
-
     Object.keys(segs).forEach(function(segNome){
-      var list = segs[segNome];
-      var min  = Math.min.apply(null, list.map(function(o){ return o.valor; }));
-      var max  = Math.max.apply(null, list.map(function(o){ return o.valor; }));
-      var aprovadoSeg = list.find(function(o){ return o.aprovado; });
-      var totalSeg = list.reduce(function(a,o){ return a+o.valor; },0);
-
+      var list = segs[segNome].slice().sort(function(a,b){ return _orcVal(a)-_orcVal(b); });
+      var min = _orcVal(list[0]), max = _orcVal(list[list.length-1]);
       html += `<div style="border-top:1px solid var(--border);padding:14px 20px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-          <div>
-            <span class="bdg bdg-b" style="font-size:12px">📂 ${segNome}</span>
-            <span style="font-size:11px;color:var(--txt3);margin-left:8px">${list.length} empresa(s) cotadas</span>
-          </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+          <div><span class="bdg bdg-b" style="font-size:12px">📂 ${escH(segNome)}</span>
+            <span style="font-size:11px;color:var(--txt3);margin-left:8px">${list.length} empresa(s) cotadas</span></div>
           <div style="font-size:11px;color:var(--txt3)">Menor: <strong style="color:var(--g)">${fmtVal(min)}</strong> · Maior: <strong style="color:var(--err)">${fmtVal(max)}</strong></div>
         </div>`;
-
       list.forEach(function(o, i){
-        var isMin = o.valor===min;
-        var dif = o.valor>min ? ' +'+((((o.valor-min)/min)*100)).toFixed(1)+'%' : '';
-        var ini = o.empresa.split(' ').map(function(w){ return w[0]||''; }).join('').toUpperCase().slice(0,2)||'??';
-        // Monta bloco de arquivos com ações por arquivo
-        var arquivosHtml = '';
-        if(o.arquivosLinks&&o.arquivosLinks.length){
-          arquivosHtml = '<div style="margin-top:6px;display:flex;flex-direction:column;gap:4px">';
-          o.arquivosLinks.forEach(function(l,ai){
-            arquivosHtml += '<div style="display:flex;align-items:center;gap:6px;background:var(--gl);border-radius:6px;padding:4px 8px">'
-              +'<a href="'+l.url+'" target="_blank" style="color:var(--info);font-size:12px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px" title="'+l.nome+'">📄 '+l.nome+'</a>'
-              +'<button onclick="substituirArquivoOrc(\''+o.id+'\','+ai+')" style="background:none;border:1px solid var(--border2);border-radius:4px;padding:2px 7px;font-size:10px;color:var(--txt2);cursor:pointer" title="Substituir">↑</button>'
-              +'<button onclick="excluirArquivoOrc(\''+o.id+'\','+ai+')" style="background:none;border:1px solid #fca5a5;border-radius:4px;padding:2px 7px;font-size:10px;color:var(--err);cursor:pointer" title="Excluir arquivo">✕</button>'
-              +'</div>';
-          });
-          arquivosHtml += '</div>';
-        } else if(o.arquivos&&o.arquivos.length){
-          arquivosHtml = '<div style="font-size:11px;color:var(--txt3);margin-top:4px">📄 '+o.arquivos.join(', ')+'</div>';
-        }
-        // Botão para adicionar novo arquivo
-        arquivosHtml += '<div style="margin-top:4px"><label style="cursor:pointer;font-size:11px;color:var(--g);display:inline-flex;align-items:center;gap:4px">'
-          +'<input type="file" style="display:none" onchange="adicionarArquivoOrc(\''+o.id+'\', this)">'
-          +'＋ Anexar arquivo</label></div>';
-
-        if(o.aprovado){
-          // Card simplificado para aprovado: só valor, link e excluir
-          var linkHtml = (o.arquivosLinks&&o.arquivosLinks.length)
-            ? o.arquivosLinks.map(function(l){ return '<a href="'+l.url+'" target="_blank" style="color:var(--info);font-size:11px;display:inline-flex;align-items:center;gap:4px;margin-right:8px">📄 '+l.nome+'</a>'; }).join('')
-            : (o.arquivos&&o.arquivos.length ? '<span style="font-size:11px;color:var(--txt3)">📄 '+o.arquivos.join(', ')+'</span>' : '');
-          html += `<div class="orc-card" style="margin-bottom:8px;background:var(--gl);border-color:var(--gb)">
-            <div class="orc-ini" style="background:#00843D">${ini}</div>
-            <div style="min-width:0;flex:1">
-              <div class="orc-n">${o.empresa} <span class="bdg bdg-g" style="font-size:10px">✅ Aprovado</span></div>
-              <div style="margin-top:4px">${linkHtml}</div>
+        var v = _orcVal(o), isMin = v===min;
+        var dif = (v>min && min>0) ? ' +'+(((v-min)/min)*100).toFixed(1)+'%' : '';
+        html += `<div class="orc-card" style="margin-bottom:8px">
+          <div class="orc-ini" style="background:${colors[i%colors.length]}">${escH(_orcIni(o))}</div>
+          <div style="min-width:0;flex:1">
+            <div class="orc-n">${escH(o.empresa)}</div>
+            <div class="orc-s">${o.prazo?'⏱ '+escH(o.prazo)+' · ':''}${o.garantia?'🛡 '+escH(o.garantia)+' · ':''}${o.data?'📅 '+escH(o.data):''}</div>
+            ${o.obs?`<div style="font-size:11px;color:var(--txt3);margin-top:3px">${escH(o.obs)}</div>`:''}
+            ${_arquivosEditaveisHtml(o)}
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div class="orc-v">${fmtVal(v)}</div>
+            <div class="orc-tag" style="margin-top:4px">${isMin?'<span class="bdg bdg-g">✦ Menor</span>':'<span style="color:var(--err);font-size:11px;font-weight:600">'+dif+'</span>'}</div>
+            <div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end">
+              <button class="btn-sm-g" onclick="aprovarOrcId('${o.id}')">✅ Aprovar</button>
+              <button class="btn-danger" style="padding:5px 10px;font-size:11px" onclick="excluirOrcId('${o.id}')">🗑</button>
             </div>
-            <div style="text-align:right;flex-shrink:0">
-              <div class="orc-v" style="color:var(--g)">${fmtVal(o.valor)}</div>
-              <button class="btn-danger" style="padding:5px 10px;font-size:11px;margin-top:8px" onclick="excluirOrcId('${o.id}')">🗑</button>
-            </div>
-          </div>`;
-        } else {
-          html += `<div class="orc-card" style="margin-bottom:8px">
-            <div class="orc-ini" style="background:${colors[i%colors.length]}">${ini}</div>
-            <div style="min-width:0;flex:1">
-              <div class="orc-n">${o.empresa}</div>
-              <div class="orc-s">${o.prazo?'⏱ '+o.prazo+' · ':''}${o.garantia?'🛡 '+o.garantia+' · ':''}${o.data?'📅 '+o.data:''}</div>
-              ${o.obs?`<div style="font-size:11px;color:var(--txt3);margin-top:3px">${o.obs}</div>`:''}
-              ${arquivosHtml}
-            </div>
-            <div style="text-align:right;flex-shrink:0">
-              <div class="orc-v">${fmtVal(o.valor)}</div>
-              <div class="orc-tag" style="margin-top:4px">
-                ${isMin?'<span class="bdg bdg-g">✦ Menor</span>':'<span style="color:var(--err);font-size:11px;font-weight:600">'+dif+'</span>'}
-              </div>
-              <div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end">
-                <button class="btn-sm-g" onclick="aprovarOrcId('${o.id}')">✅ Aprovar</button>
-                <button class="btn-danger" style="padding:5px 10px;font-size:11px" onclick="excluirOrcId('${o.id}')">🗑</button>
-              </div>
-            </div>
-          </div>`;
-        }
+          </div>
+        </div>`;
       });
-
-      // Recomendação do segmento
-      if(list.length>1){
-        var rec = list.slice().sort(function(a,b){ return a.valor-b.valor; })[0];
+      if(list.length>1 && min>0){
         html += `<div class="ai-box" style="margin-top:6px">
           <div class="ai-t">🤖 Recomendação do segmento</div>
-          <p><strong>${rec.empresa}</strong> apresenta o menor valor (${fmtVal(rec.valor)}) neste segmento. Diferença entre menor e maior: ${fmtVal(max-min)} (${(((max-min)/min)*100).toFixed(1)}%). Verifique escopo, garantias e certificações antes de aprovar.</p>
+          <p><strong>${escH(list[0].empresa)}</strong> apresenta o menor valor (${fmtVal(min)}) neste segmento. Diferença entre menor e maior: ${fmtVal(max-min)} (${(((max-min)/min)*100).toFixed(1)}%). Verifique escopo, garantias e certificações antes de aprovar.</p>
         </div>`;
       }
-      html += '</div>'; // fecha segmento
+      html += '</div>';
     });
-
-    html += '</div>'; // fecha card obra
+    html += '</div>';
   });
+  return html;
+}
 
-  lista.innerHTML = html;
-  _restaurarEstadoOrc(_estadoOrc);
+function _renderAprovados(orcs){
+  var byObra = _agruparObraSeg(orcs);
+  var html = '';
+  Object.keys(byObra).sort().forEach(function(obraNome, oi){
+    var segs = byObra[obraNome];
+    var obra = (state.obras[state.unit]||[]).find(function(ob){ return ob.nome === obraNome; });
+    var aprovList = [];
+    Object.keys(segs).forEach(function(s){ aprovList = aprovList.concat(segs[s].filter(function(o){ return o.aprovado; })); });
+    var totalAprov = aprovList.reduce(function(a,o){ return a+_orcVal(o); },0);
+    html += `<div class="card" style="padding:0;overflow:hidden;margin-bottom:18px">
+      <div style="background:linear-gradient(135deg,#0F766E,#115E59);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div>
+          <div style="font-size:15px;font-weight:700;color:#fff">🏗 ${escH(obraNome)} ${obra?`<span class="bdg ${badgeCls(obra.status)}" style="margin-left:6px;font-size:10px">${escH(obra.status||'—')}</span>`:'<span class="bdg bdg-r" style="margin-left:6px;font-size:10px">Obra não encontrada</span>'}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:2px">${aprovList.length} contratado(s) · ${Object.keys(segs).length} segmento(s) concluído(s)</div>
+        </div>
+        <div style="text-align:right;color:#fff">
+          <div style="font-size:20px;font-weight:700">${fmtValCompact(totalAprov)}</div>
+          <div style="font-size:10px;opacity:.7">total aprovado</div>
+        </div>
+      </div>`;
+    Object.keys(segs).forEach(function(segNome, si){
+      var list = segs[segNome];
+      var ap = list.filter(function(o){ return o.aprovado; });
+      var perd = list.filter(function(o){ return !o.aprovado; }).sort(function(a,b){ return _orcVal(a)-_orcVal(b); });
+      var minSeg = Math.min.apply(null, list.map(_orcVal));
+      html += `<div style="border-top:1px solid var(--border);padding:14px 20px">
+        <div style="margin-bottom:10px"><span class="bdg bdg-teal" style="font-size:12px">📂 ${escH(segNome)}</span>
+          <span style="font-size:11px;color:var(--txt3);margin-left:8px">${list.length} proposta(s) na cotação</span></div>`;
+      ap.forEach(function(o){
+        var vin = _orcVinculo(o), v = _orcVal(o);
+        var economia = perd.length ? Math.max.apply(null, perd.map(_orcVal)) - v : 0;
+        html += `<div class="orc-card" style="margin-bottom:6px;background:var(--gl);border-color:var(--gb);cursor:default">
+          <div class="orc-ini" style="background:#00843D">${escH(_orcIni(o))}</div>
+          <div style="min-width:0;flex:1">
+            <div class="orc-n">${escH(o.empresa)} <span class="bdg bdg-g" style="font-size:10px">✅ Aprovado</span>
+              ${vin.vinculado?'<span class="bdg bdg-teal" style="font-size:10px">🔗 Vinculado à obra</span>':`<span class="bdg bdg-o" style="font-size:10px">⚠ Não vinculado</span>`}
+              ${v===minSeg&&list.length>1?'<span class="bdg bdg-gray" style="font-size:10px">✦ Menor preço</span>':''}</div>
+            <div class="orc-meta">
+              ${o.cnpj?`<div><b>CNPJ</b>${escH(o.cnpj)}</div>`:''}
+              ${o.contato?`<div><b>Contato</b>${escH(o.contato)}</div>`:''}
+              ${o.prazo?`<div><b>Prazo</b>${escH(o.prazo)}</div>`:''}
+              ${o.garantia?`<div><b>Garantia</b>${escH(o.garantia)}</div>`:''}
+              <div><b>Aprovado em</b>${escH(o.aprovadoData||o.data||'—')}</div>
+              ${economia>0?`<div><b>Economia vs maior</b><span style="color:var(--g);font-weight:700">${fmtVal(economia)}</span></div>`:''}
+            </div>
+            ${o.obs?`<div style="font-size:11px;color:var(--txt3);margin-top:4px">${escH(o.obs)}</div>`:''}
+            <div style="margin-top:6px">${_arquivosLinksHtml(o)}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div class="orc-v" style="color:var(--g)">${fmtVal(v)}</div>
+            <div style="display:flex;gap:6px;margin-top:8px;justify-content:flex-end;flex-wrap:wrap">
+              ${!vin.vinculado&&vin.obra?`<button class="btn-sm-g" style="padding:5px 10px;font-size:11px" onclick="vincularOrcId('${o.id}')">🔗 Vincular</button>`:''}
+              <button class="btn-s" style="padding:5px 10px;font-size:11px" onclick="reabrirOrcId('${o.id}')" title="Desfaz a aprovação e devolve o segmento para Em cotação">↩ Reabrir</button>
+              <button class="btn-danger" style="padding:5px 10px;font-size:11px" onclick="excluirOrcId('${o.id}')">🗑</button>
+            </div>
+          </div>
+        </div>`;
+      });
+      if(perd.length){
+        html += `<details class="orc-perd" id="orcdet-${oi}-${si}"><summary>${perd.length} proposta(s) não selecionada(s)</summary>`
+          + perd.map(function(o){
+              var dif = minSeg>0 && _orcVal(o)>minSeg ? ' <span style="color:var(--err)">+'+(((_orcVal(o)-minSeg)/minSeg)*100).toFixed(1)+'%</span>' : '';
+              return `<div class="orc-perd-row"><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escH(o.empresa)}${o.data?' · <span style="color:var(--txt3)">'+escH(o.data)+'</span>':''}</span>
+                <span style="font-family:'DM Mono',monospace">${fmtVal(_orcVal(o))}${dif}</span>
+                <span>${_arquivosLinksHtml(o).indexOf('<a')===0?_arquivosLinksHtml(o):''}</span>
+                <button class="btn-danger" style="padding:3px 8px;font-size:10px" onclick="excluirOrcId('${o.id}')">🗑</button></div>`;
+            }).join('')
+          + '</details>';
+      }
+      html += '</div>';
+    });
+    html += '</div>';
+  });
+  return html;
+}
+
+// Vincula o orçamento aprovado como prestador na obra. Retorna {obra, jaExiste}
+function _vincularPrestador(orc){
+  var r = {obra:null, jaExiste:false};
+  if(!orc.obra) return r;
+  var obra = (state.obras[state.unit]||[]).find(function(o){ return o.nome === orc.obra; });
+  if(!obra) return r;
+  r.obra = obra;
+  obra.prestadores = obra.prestadores||[];
+  r.jaExiste = !!obra.prestadores.find(function(p){ return p.nome === (orc.empresa||'—') && (p.servico||'Geral') === (orc.segmento||'Geral'); });
+  if(r.jaExiste) return r;
+  var novo = {
+    nome: orc.empresa||'—', doc: orc.cnpj||'', contato: orc.contato||'',
+    servico: orc.segmento||'Geral', valor: _orcVal(orc),
+    rt:'', pct:0, atividade:'', ultimaAtualizacao: new Date().toLocaleDateString('pt-BR'),
+    obs:'', ocorrencias:[]
+  };
+  obra.prestadores.push(novo);
+  enviarSheets({ tipo:'prestador', unidade:state.unit, obra:obra.nome,
+    nome:novo.nome, doc:novo.doc, contato:novo.contato, servico:novo.servico, valor:novo.valor,
+    rt:'', pct:0, ultimaAtualizacao:novo.ultimaAtualizacao, obs:'' });
+  enviarSheets(obraParaSheets(obra));
+  return r;
 }
 
 function aprovarOrcId(id){
   var orc = (state.orcs[state.unit]||[]).find(function(o){ return String(o.id)===String(id); });
   if(!orc){ mostrarNotify('n-err','err'); return; }
+  if(!confirm('Aprovar a proposta de "'+(orc.empresa||'')+'" ('+fmtVal(_orcVal(orc))+')?\nEla será vinculada à obra e a cotação deste segmento irá para "Aprovados".')) return;
   orc.aprovado = true;
-
-  var obra = null, jaExiste = false;
-
-  // ── Transfere orçamento aprovado como prestador na obra correspondente ──
-  if(orc.obra){
-    obra = (state.obras[state.unit]||[]).find(function(o){ return o.nome === orc.obra; });
-    if(obra){
-      obra.prestadores = obra.prestadores||[];
-      // Evita duplicata: verifica por empresa+serviço
-      jaExiste = !!obra.prestadores.find(function(p){
-        return p.nome === (orc.empresa||'') && p.servico === (orc.segmento||'');
-      });
-      if(!jaExiste){
-        var novoPrestador = {
-          nome:    orc.empresa   || '—',
-          doc:     orc.cnpj      || '',
-          contato: orc.contato   || '',
-          servico: orc.segmento  || 'Geral',
-          valor:   orc.valor     || 0,
-          rt: '', pct: 0, atividade: '',
-          ultimaAtualizacao: new Date().toLocaleDateString('pt-BR'),
-          obs: '', ocorrencias: []
-        };
-        obra.prestadores.push(novoPrestador);
-        enviarSheets({ tipo:'prestador', unidade:state.unit, obra:obra.nome,
-          nome:novoPrestador.nome, doc:novoPrestador.doc, contato:novoPrestador.contato,
-          servico:novoPrestador.servico, valor:novoPrestador.valor,
-          rt:'', pct:0, ultimaAtualizacao:novoPrestador.ultimaAtualizacao, obs:'' });
-        enviarSheets(obraParaSheets(obra));
-      }
-    }
-  }
+  orc.aprovadoEm = Date.now();
+  orc.aprovadoData = new Date().toLocaleDateString('pt-BR');
+  var r = _vincularPrestador(orc);
 
   pausarSync(30000);
   saveLocal();
-  var arquivosStr = (orc.arquivosLinks||[]).length
-    ? orc.arquivosLinks.map(function(l){ return l.nome+': '+l.url; }).join('\n')
-    : (orc.arquivos||[]).join(',');
-  // Envia aprovado='Sim' ao Sheets para manter o padrão da planilha
-  enviarSheets(Object.assign({tipo:'orcamento', unidade:state.unit}, orc, {aprovado:'Sim', arquivos:arquivosStr}));
+  var payload = Object.assign({tipo:'orcamento', unidade:state.unit}, orc, {aprovado:'Sim', arquivos:_orcArqStr(orc)});
+  enviarSheets(payload);
   // Re-envia após 5s para garantir persistência caso o primeiro envio falhe
-  setTimeout(function(){
-    if(orc.aprovado) enviarSheets(Object.assign({tipo:'orcamento', unidade:state.unit}, orc, {aprovado:'Sim', arquivos:arquivosStr}));
-  }, 5000);
+  setTimeout(function(){ if(orc.aprovado) enviarSheets(Object.assign({}, payload, {arquivos:_orcArqStr(orc)})); }, 5000);
   renderOrcamentos();
-  var msg = jaExiste
-    ? '✅ Orçamento aprovado! Prestador já vinculado à obra.'
-    : (obra ? '✅ Aprovado! '+( orc.empresa||'Empresa' )+' adicionado como prestador em "'+orc.obra+'".' : '✅ Orçamento aprovado com sucesso!');
-  mostrarNotify('n-ok','ok', msg);
+  var msg = r.jaExiste ? '✅ Aprovado e movido para "Aprovados". Prestador já vinculado à obra.'
+    : r.obra ? '✅ Aprovado! '+(orc.empresa||'Empresa')+' vinculado a "'+orc.obra+'" e movido para "Aprovados".'
+    : '⚠️ Aprovado e movido para "Aprovados", mas a obra "'+orc.obra+'" não foi encontrada para vincular.';
+  mostrarNotify(r.obra?'n-ok':'n-warn', r.obra?'ok':'warn', msg);
+}
+
+function vincularOrcId(id){
+  var orc = (state.orcs[state.unit]||[]).find(function(o){ return String(o.id)===String(id); });
+  if(!orc) return;
+  var r = _vincularPrestador(orc);
+  pausarSync(20000); saveLocal(); renderOrcamentos();
+  mostrarNotify(r.obra?'n-ok':'n-err', r.obra?'ok':'err', r.obra?'🔗 Prestador vinculado à obra.':'❌ Obra "'+orc.obra+'" não encontrada.');
+}
+
+function reabrirOrcId(id){
+  var orc = (state.orcs[state.unit]||[]).find(function(o){ return String(o.id)===String(id); });
+  if(!orc) return;
+  if(!confirm('Reabrir a cotação de "'+(orc.segmento||'Geral')+'"?\nA aprovação de '+(orc.empresa||'')+' será desfeita e o orçamento volta para "Em cotação".\nObs.: o prestador já cadastrado na obra NÃO é removido automaticamente.')) return;
+  orc.aprovado = false; orc.aprovadoEm = ''; orc.aprovadoData = '';
+  pausarSync(30000); saveLocal();
+  enviarSheets(Object.assign({tipo:'orcamento', unidade:state.unit}, orc, {aprovado:'Não', arquivos:_orcArqStr(orc)}));
+  _orcTab = 'pend'; setOrcTab('pend');
+  mostrarNotify('n-ok','ok','↩ Cotação reaberta.');
 }
 function excluirOrcId(id){
   if(!confirm('Excluir este orçamento?')) return;
