@@ -47,6 +47,53 @@ button{cursor:pointer}
 .nav-sub .ns-ic{font-size:11px;width:14px;text-align:center}
 .nav-sub .ns-cnt{margin-left:auto;background:rgba(255,255,255,.14);border-radius:20px;padding:0 7px;font-size:10px;font-weight:700;min-width:20px;text-align:center}
 .nav-sub.on .ns-cnt{background:var(--gb);color:var(--gd)}
+.nav-grp .chev{margin-left:auto;font-size:10px;opacity:.6;transition:transform .2s}
+.nav-grp.aberto .chev{transform:rotate(90deg)}
+.nav-grp .grp-cnt{font-size:10px;background:rgba(255,255,255,.14);border-radius:20px;padding:0 7px;font-weight:700}
+.nav-sub.fechado{display:none}
+.est-filtros{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;margin-bottom:14px}
+.est-seg{display:flex;align-items:center;gap:0;background:#fff;border:1px solid var(--border2);border-radius:9px;overflow:hidden}
+.est-seg span{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--txt3);padding:0 10px;letter-spacing:.04em}
+.est-seg button{border:none;border-left:1px solid var(--border);background:none;padding:7px 12px;font:600 12px var(--font);color:var(--txt2);cursor:pointer}
+.est-seg button.on{background:var(--g);color:#fff}
+.est-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:16px}
+.est-kpi{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
+.est-kpi .l{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--txt3)}
+.est-kpi .v{font-size:22px;font-weight:700;color:var(--txt);margin-top:4px}
+.est-kpi .v small{font-size:12px;font-weight:500;color:var(--txt2)}
+.est-kpi .s{font-size:11px;color:var(--txt2);margin-top:2px}
+.est-kpi.good{border-left:4px solid var(--g)}.est-kpi.bad{border-left:4px solid var(--err)}
+.est-ins{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:8px}
+.est-in{display:flex;gap:10px;align-items:flex-start;font-size:12.5px;line-height:1.45;color:var(--txt2);background:var(--bg);border-radius:9px;padding:10px 12px;border-left:4px solid var(--border2)}
+.est-in b{color:var(--txt)}.est-in .ic{font-size:14px;flex-shrink:0}
+.est-in.bad{border-left-color:var(--err);background:#FEF2F2}.est-in.warn{border-left-color:var(--warn);background:#FFFBEB}.est-in.good{border-left-color:var(--g);background:var(--gl)}.est-in.info{border-left-color:var(--info)}
+.est-scroll{overflow-x:auto;max-width:100%}
+.est-leg{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--txt2);margin-top:8px;flex-wrap:wrap}
+.est-leg i{display:inline-block;width:22px;height:10px;border-radius:2px}
+.est-leg span{margin:0 4px}
+.est-mx{border-collapse:separate;border-spacing:2px;font-size:11px;min-width:100%}
+.est-mx th{font-weight:600;color:var(--txt3);padding:4px 6px;text-align:center;white-space:nowrap}
+.est-mx th.hj{color:var(--gd);text-decoration:underline}
+.est-mx td{padding:6px;text-align:center;border-radius:4px;background:#F9FAFB;white-space:nowrap;font-family:var(--mono);color:var(--txt)}
+.est-mx .st{text-align:left;max-width:220px;overflow:hidden;text-overflow:ellipsis;font-family:var(--font);font-weight:600;background:none;position:sticky;left:0;background:#fff;z-index:1}
+.est-mx .tt{font-weight:700;background:var(--bg)}
+.est-mx tfoot td{font-weight:700;background:var(--bg)}
+.est-tb{width:100%;border-collapse:collapse;font-size:12px}
+.est-tb th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--txt3);padding:8px;border-bottom:1px solid var(--border);white-space:nowrap}
+.est-tb td{padding:8px;border-bottom:1px solid var(--border);vertical-align:middle}
+.est-tb tr:hover td{background:#FAFBFC}
+.est-tb .mut{font-size:10.5px;color:var(--txt3)}
+.est-bar{height:6px;background:var(--bg);border-radius:4px;overflow:hidden;width:90px;margin:2px 0}
+.est-bar i{display:block;height:100%;background:var(--g);border-radius:4px}
+.est-2col{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}.est-2col>.card{min-width:0}
+.est-hb{display:grid;grid-template-columns:minmax(90px,170px) 1fr 70px;gap:10px;align-items:center;padding:5px 0;font-size:12px}
+.est-hb .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.est-hb .t{height:14px}.est-hb .t>i{display:block;height:100%;border-radius:0 4px 4px 0}.est-hb .t>i>i{display:block;height:100%;border-radius:0 4px 4px 0}
+.est-hb .val{text-align:right;font-family:var(--mono);font-size:11px}
+.est-tip{position:fixed;z-index:9999;display:none;background:#111827;color:#fff;font-size:12px;line-height:1.45;padding:8px 11px;border-radius:8px;pointer-events:none;box-shadow:0 6px 20px rgba(0,0,0,.25);max-width:280px}
+@media(max-width:900px){.est-2col{grid-template-columns:minmax(0,1fr)}}
+.main{min-width:0}
+@media(max-width:600px){.content{padding:14px 12px}.topbar{padding:12px;flex-wrap:wrap;gap:8px}.tp-actions{flex-wrap:wrap}.unit-header{padding:16px;gap:10px}.ct-grid{grid-template-columns:1fr}.est-seg{flex-wrap:wrap}.est-hb{grid-template-columns:90px 1fr 56px}.est-ins{grid-template-columns:1fr}#pg-estatisticas .sec-t{flex-wrap:wrap;gap:4px}}
 .acomp-status-bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:9px 14px;margin-bottom:14px}
 .acomp-status-bar label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--txt3);letter-spacing:.04em}
 .acomp-status-bar select{font-size:13px;border:1px solid var(--border2);border-radius:8px;padding:6px 10px;background:#fff;color:var(--txt)}
@@ -303,7 +350,7 @@ tbody tr:hover td{background:#F9FAFB}
 }
 @media(max-width:860px){
   .sb{width:56px}.main{margin-left:56px}
-  .sb-brand,.sb-sub,.nav-item span:not(.ni),.unit-item span,.sb-url-box,.sync-st,.nav-label,.nav-sub .ns-lbl,.nav-sub .ns-cnt{display:none}
+  .sb-brand,.sb-sub,.nav-item span:not(.ni),.nav-grp .chev,.unit-item span,.sb-url-box,.sync-st,.nav-label,.nav-sub .ns-lbl,.nav-sub .ns-cnt{display:none}
   .nav-sub{justify-content:center;padding:6px}
   .nav-item,.unit-item{justify-content:center;padding:12px}
   .obra-card{grid-template-columns:1fr auto auto}
@@ -332,13 +379,14 @@ tbody tr:hover td{background:#F9FAFB}
   <div class="nav-label">Menu</div>
   <button class="nav-item on" onclick="navMenu('dashboard',this)"><span class="ni">📊</span><span>Dashboard</span></button>
   <button class="nav-item" onclick="navMenu('cadastrar',this)"><span class="ni">📋</span><span>Cadastrar obra</span></button>
-  <button class="nav-item nav-grp" data-pg="atualizar" onclick="navMenu('atualizar',this)"><span class="ni">🔄</span><span>Acompanhamento</span></button>
+  <button class="nav-item nav-grp" data-pg="atualizar" onclick="navGrupo('atualizar')"><span class="ni">🔄</span><span>Acompanhamento</span><span class="chev">▶</span></button>
   <button class="nav-sub" data-pg="atualizar" data-sub="andamento" onclick="navSub('atualizar','andamento')" title="Obras em andamento"><span class="ns-ic">🚧</span><span class="ns-lbl">Em andamento</span><span class="ns-cnt" id="nav-cnt-andamento">0</span></button>
   <button class="nav-sub" data-pg="atualizar" data-sub="finalizadas" onclick="navSub('atualizar','finalizadas')" title="Obras finalizadas"><span class="ns-ic">🏁</span><span class="ns-lbl">Finalizadas</span><span class="ns-cnt" id="nav-cnt-finalizadas">0</span></button>
-  <button class="nav-item nav-grp" data-pg="orcamentos" onclick="navMenu('orcamentos',this)"><span class="ni">💰</span><span>Orçamentos</span></button>
+  <button class="nav-item nav-grp" data-pg="orcamentos" onclick="navGrupo('orcamentos')"><span class="ni">💰</span><span>Orçamentos</span><span class="chev">▶</span></button>
   <button class="nav-sub" data-pg="orcamentos" data-sub="pend" onclick="navSub('orcamentos','pend')" title="Orçamentos em cotação"><span class="ns-ic">🕒</span><span class="ns-lbl">Em cotação</span><span class="ns-cnt" id="nav-cnt-pend">0</span></button>
   <button class="nav-sub" data-pg="orcamentos" data-sub="aprov" onclick="navSub('orcamentos','aprov')" title="Aprovados — obra em execução"><span class="ns-ic">✅</span><span class="ns-lbl">Aprovados</span><span class="ns-cnt" id="nav-cnt-aprov">0</span></button>
   <button class="nav-sub" data-pg="orcamentos" data-sub="exec" onclick="navSub('orcamentos','exec')" title="Executados — obra concluída"><span class="ns-ic">🏁</span><span class="ns-lbl">Executados</span><span class="ns-cnt" id="nav-cnt-exec">0</span></button>
+  <button class="nav-item" data-pg="estatisticas" onclick="navMenu('estatisticas')"><span class="ni">📈</span><span>Estatísticas</span></button>
 
   <div class="nav-label units">Unidades</div>
   <button class="unit-item on" onclick="selUnit('Matriz',this)"><div class="unit-dot"></div><span>Matriz</span></button>
@@ -492,6 +540,18 @@ tbody tr:hover td{background:#F9FAFB}
     </div>
 
     <!-- ── PORTAL PRESTADOR ──────────────────────────────────── -->
+
+    <!-- ── ESTATÍSTICAS ──────────────────────────────────────── -->
+    <div id="pg-estatisticas" class="pg">
+      <div class="unit-header">
+        <div>
+          <div class="uh-name" id="uh-name-est">Matriz</div>
+          <div class="uh-sub">Indicadores financeiros, prazos, cotações e fornecedores</div>
+        </div>
+        <div class="uh-stat"><div class="uh-stat-v">📈</div><div class="uh-stat-l">análise</div></div>
+      </div>
+      <div id="est-conteudo"></div>
+    </div>
 
     <!-- ── ORÇAMENTOS ──────────────────────────────────────── -->
     <div id="pg-orcamentos" class="pg">
@@ -918,6 +978,7 @@ function carregarDoSheets(cb){
       if(state.menu === 'atualizar') renderAcompanhamento();
       else if(state.menu === 'orcamentos') renderOrcamentos();
       else renderPage();
+      _atualizarContadoresNav();
     } else {
       setSyncStatus('⚠️ Conectado mas sem dados ainda');
     }
@@ -1025,7 +1086,8 @@ function mergeEstadoRemoto(obrasRemote, orcsRemote){
 }
 
 // ── NAVEGAÇÃO ────────────────────────────────────────────────────
-var menuTitles = { dashboard:'Dashboard', cadastrar:'Cadastrar obra', atualizar:'Acompanhamento', orcamentos:'Orçamentos' };
+var menuTitles = { dashboard:'Dashboard', cadastrar:'Cadastrar obra', atualizar:'Acompanhamento', orcamentos:'Orçamentos', estatisticas:'Estatísticas' };
+var _navAberto = {};
 function navMenu(pg, el){
   state.menu = pg;
   document.querySelectorAll('.pg').forEach(function(x){ x.classList.remove('on'); });
@@ -1035,7 +1097,13 @@ function navMenu(pg, el){
   renderPage();
 }
 // Subgrupos do menu: Acompanhamento (andamento/finalizadas) e Orçamentos (pend/aprov)
+// Clique no grupo: abre/fecha os subitens (e entra na página se ainda não estiver nela)
+function navGrupo(pg){
+  if(state.menu !== pg){ _navAberto[pg] = true; navMenu(pg); }
+  else { _navAberto[pg] = !_navAberto[pg]; _syncNavUI(); }
+}
 function navSub(pg, sub){
+  _navAberto[pg] = true;
   if(pg==='atualizar') _acompTab = sub; else if(pg==='orcamentos') _orcTab = sub;
   if(state.menu !== pg) navMenu(pg);
   else if(pg==='atualizar') setAcompTab(sub); else setOrcTab(sub);
@@ -1047,8 +1115,11 @@ function _syncNavUI(){
     x.classList.toggle('on', pg ? pg===state.menu : (x.getAttribute('onclick')||'').indexOf("'"+state.menu+"'")>=0);
   });
   document.querySelectorAll('.nav-sub').forEach(function(x){
-    x.classList.toggle('on', x.getAttribute('data-pg')===state.menu && x.getAttribute('data-sub')===subAtual);
+    var pg = x.getAttribute('data-pg');
+    x.classList.toggle('on', pg===state.menu && x.getAttribute('data-sub')===subAtual);
+    x.classList.toggle('fechado', !_navAberto[pg]);
   });
+  document.querySelectorAll('.nav-grp').forEach(function(x){ x.classList.toggle('aberto', !!_navAberto[x.getAttribute('data-pg')]); });
   var t = document.getElementById('tp-t');
   if(t && subAtual){
     var nomes = {andamento:'Em andamento', finalizadas:'Finalizadas', pend:'Em cotação', aprov:'Aprovados', exec:'Executados'};
@@ -1079,7 +1150,7 @@ function selUnit(nome, el){
 
 function renderPage(){
   var u = state.unit;
-  ['cad','upd','orc','prest'].forEach(function(k){
+  ['cad','upd','orc','prest','est'].forEach(function(k){
     var el = document.getElementById('uh-name-'+k); if(el) el.textContent = u;
   });
   var lbl = document.getElementById('lbl-unit-obras'); if(lbl) lbl.textContent = u;
@@ -1088,6 +1159,7 @@ function renderPage(){
   if(state.menu === 'cadastrar') renderObras();
   if(state.menu === 'atualizar') renderAcompanhamento();
   if(state.menu === 'orcamentos') renderOrcamentos();
+  if(state.menu === 'estatisticas') renderEstatisticas();
   atualizarSelects();
   _atualizarContadoresNav();
   _syncNavUI();
@@ -2750,6 +2822,320 @@ function _renderAprovados(orcs, executado){
   });
   return html;
 }
+
+// ══ ESTATÍSTICAS ══════════════════════════════════════════════
+var _est = { escopo:'unidade', ano:'todos', medida:'previsto' };
+var MES_ABR = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+var SEQ_G = ['#EEF7F0','#CFEAD6','#9FD4AE','#5DB57E','#1F9255','#00703A','#004D23']; // sequencial verde (claro→escuro)
+
+function setEst(k, v){ _est[k] = v; renderEstatisticas(); }
+function _dBR(s){
+  s = strData(s); var m = /^(\d{2})\/(\d{2})\/(\d{4})/.exec(s||'');
+  if(!m) return null; var d = new Date(+m[3], +m[2]-1, +m[1], 12); return isNaN(d) ? null : d;
+}
+function _mk(d){ return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+function _mkLbl(k){ var p=k.split('-'); return MES_ABR[+p[1]-1]+'/'+p[0].slice(2); }
+function _fmtD(d){ return d ? d.toLocaleDateString('pt-BR') : '—'; }
+function _pct(v){ return (isFinite(v)?v:0).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%'; }
+function _seqCor(v, max){ if(!v||!max) return ''; var i=Math.min(SEQ_G.length-1, Math.max(1, Math.round(v/max*(SEQ_G.length-2))+1)); return SEQ_G[i]; }
+
+// Coleta obras/orçamentos no escopo (unidade atual ou todas)
+function _estDados(){
+  var unidades = _est.escopo==='todas' ? Object.keys(Object.assign({}, state.obras, state.orcs)) : [state.unit];
+  var obras = [], orcs = [];
+  unidades.forEach(function(u){
+    (state.obras[u]||[]).forEach(function(o){ obras.push(Object.assign({_u:u}, o)); });
+    (state.orcs[u]||[]).forEach(function(o){ orcs.push(Object.assign({_u:u}, o)); });
+  });
+  return {obras:obras, orcs:orcs, multi:unidades.length>1};
+}
+function _estNomeObra(o, multi){ return (multi ? o._u+' · ' : '') + (o.nome||o.obra||'(Sem obra)'); }
+
+// Distribui valor da obra pelos meses entre início e prazo (proporcional aos dias)
+function _cronograma(o){
+  var ini = _dBR(o.inicio), fim = _dBR(o.prazo);
+  var c = custoTotalObra(o); var valor = Math.max(c.contrato, c.prestadores);
+  if(!ini || !fim || fim < ini || !valor) return null;
+  var dias = Math.max(1, Math.round((fim-ini)/864e5)+1), out = {};
+  var d = new Date(ini);
+  while(d <= fim){
+    var k = _mk(d), fimMes = new Date(d.getFullYear(), d.getMonth()+1, 0, 12);
+    var ate = fimMes < fim ? fimMes : fim;
+    var n = Math.round((ate-d)/864e5)+1;
+    out[k] = (out[k]||0) + valor*n/dias;
+    d = new Date(d.getFullYear(), d.getMonth()+1, 1, 12);
+  }
+  return out;
+}
+
+// Indicadores de prazo: % tempo decorrido x % físico
+function _prazoObra(o){
+  var ini = _dBR(o.inicio), fim = _dBR(o.prazo), hoje = new Date();
+  var fis = pctObra(o), concl = _obraFinalizada(o);
+  var r = {ini:ini, fim:fim, fis:fis, tempo:null, idp:null, prev:null, sit:'Sem datas', nivel:0, dias:null};
+  if(!ini || !fim || fim <= ini) return r;
+  var total = (fim-ini)/864e5, dec = Math.max(0, (hoje-ini)/864e5);
+  r.tempo = Math.min(100, dec/total*100);
+  r.dias = Math.round((fim-hoje)/864e5);
+  if(concl){ r.sit='Concluída'; r.nivel=0; return r; }
+  if(hoje < ini){ r.sit='Não iniciada'; r.nivel=0; return r; }
+  r.idp = r.tempo>0 ? fis/r.tempo : null;
+  if(fis>0) r.prev = new Date(ini.getTime() + dec/(fis/100)*864e5);
+  if(hoje > fim && fis < 100){ r.sit='Atrasada'; r.nivel=3; }
+  else if(r.idp!==null && r.idp < .8){ r.sit='Risco de atraso'; r.nivel=2; }
+  else if(r.idp!==null && r.idp < .95){ r.sit='Atenção'; r.nivel=1; }
+  else r.sit='No prazo';
+  return r;
+}
+var _SIT_BDG = {'Atrasada':['bdg-r','⛔'],'Risco de atraso':['bdg-o','⚠'],'Atenção':['bdg-o','◔'],'No prazo':['bdg-g','✔'],'Concluída':['bdg-teal','🏁'],'Não iniciada':['bdg-gray','•'],'Sem datas':['bdg-gray','?']};
+
+function renderEstatisticas(){
+  var el = document.getElementById('est-conteudo'); if(!el) return;
+  var D = _estDados(), obras = D.obras, orcs = D.orcs, multi = D.multi;
+  var hoje = new Date();
+
+  // ── Rodadas de cotação (obra+segmento)
+  var grupos = {};
+  orcs.forEach(function(o){ var k=o._u+'||'+_orcObraNome(o)+'||'+(o.segmento||'Geral'); (grupos[k]=grupos[k]||[]).push(o); });
+  var economia = 0, economiaMedia = 0, aprovTotal = 0, naoMenor = [], cotUnica = [], dispersoes = [], segStats = {};
+  Object.keys(grupos).forEach(function(k){
+    var g = grupos[k], vals = g.map(_orcVal).filter(function(v){ return v>0; });
+    var ap = g.filter(function(o){ return o.aprovado; });
+    var seg = g[0].segmento||'Geral';
+    var ss = segStats[seg] = segStats[seg] || {seg:seg, aprovado:0, economia:0, propostas:0, rodadas:0};
+    ss.propostas += g.length; ss.rodadas++;
+    if(vals.length>1){ var mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals); if(mn>0) dispersoes.push((mx-mn)/mn*100); }
+    if(vals.length===1 && !ap.length) cotUnica.push(g[0]);
+    ap.forEach(function(a){
+      var v=_orcVal(a); aprovTotal += v; ss.aprovado += v;
+      if(vals.length>1){
+        var mx=Math.max.apply(null,vals), mn=Math.min.apply(null,vals), med=vals.reduce(function(x,y){return x+y;},0)/vals.length;
+        economia += Math.max(0,mx-v); economiaMedia += Math.max(0,med-v); ss.economia += Math.max(0,mx-v);
+        if(v > mn) naoMenor.push({o:a, dif:v-mn});
+      } else cotUnica.push(a);
+    });
+  });
+
+  // ── Totais financeiros
+  var contratado=0, custoPrest=0, executado=0;
+  obras.forEach(function(o){
+    var c = custoTotalObra(o); contratado += Math.max(c.contrato, c.prestadores); custoPrest += c.prestadores;
+    var ps = o.prestadores||[];
+    if(ps.length) ps.forEach(function(p){ executado += parseBRL(p.valor)*(Math.min(100,p.pct||0)/100); });
+    else executado += (parseFloat(o.valor)||0)*(pctObra(o)/100);
+  });
+  var prazos = obras.map(function(o){ return {o:o, p:_prazoObra(o)}; });
+  var atrasadas = prazos.filter(function(x){ return x.p.nivel===3; });
+  var risco = prazos.filter(function(x){ return x.p.nivel===2; });
+  var ativas = obras.filter(function(o){ return !_obraFinalizada(o); });
+
+  // ── Matriz obra × mês
+  var linhas = {}, meses = {}, semData = 0;
+  function add(nome, mk, v){ linhas[nome]=linhas[nome]||{}; linhas[nome][mk]=(linhas[nome][mk]||0)+v; meses[mk]=1; }
+  if(_est.medida==='previsto'){
+    obras.forEach(function(o){ var cr=_cronograma(o); if(!cr){ semData++; return; } Object.keys(cr).forEach(function(k){ add(_estNomeObra(o,multi), k, cr[k]); }); });
+  } else {
+    orcs.forEach(function(o){
+      if(_est.medida==='aprovado' && !o.aprovado) return;
+      var d = _dBR(_est.medida==='aprovado' ? (o.aprovadoData||o.data) : o.data); if(!d){ semData++; return; }
+      add((multi?o._u+' · ':'')+_orcObraNome(o), _mk(d), _est.medida==='propostas' ? 1 : _orcVal(o));
+    });
+  }
+  var anos = {}; Object.keys(meses).forEach(function(k){ anos[k.slice(0,4)]=1; });
+  obras.concat(orcs).forEach(function(o){ [o.inicio,o.prazo,o.data].forEach(function(x){ var d=_dBR(x); if(d) anos[d.getFullYear()]=1; }); });
+  var anosL = Object.keys(anos).sort();
+  if(_est.ano!=='todos' && anosL.indexOf(String(_est.ano))<0) _est.ano='todos';
+  var mks = Object.keys(meses).filter(function(k){ return _est.ano==='todos' || k.slice(0,4)===String(_est.ano); }).sort();
+  if(mks.length){ // preenche meses vazios
+    var a=mks[0].split('-'), b=mks[mks.length-1].split('-'), cur=new Date(+a[0],+a[1]-1,1), lim=new Date(+b[0],+b[1]-1,1); mks=[];
+    while(cur<=lim){ mks.push(_mk(cur)); cur=new Date(cur.getFullYear(),cur.getMonth()+1,1); }
+  }
+  var isQtd = _est.medida==='propostas';
+  var fv = function(v){ return isQtd ? String(Math.round(v)) : fmtValCompact(v); };
+  var fvL = function(v){ return isQtd ? Math.round(v)+' proposta(s)' : fmtVal(v); };
+  var totMes = mks.map(function(k){ return Object.keys(linhas).reduce(function(a,n){ return a+(linhas[n][k]||0); },0); });
+  var nomesL = Object.keys(linhas).map(function(n){ return {n:n, t:mks.reduce(function(a,k){ return a+(linhas[n][k]||0); },0)}; })
+    .filter(function(x){ return x.t>0; }).sort(function(a,b){ return b.t-a.t; });
+  var maxCel = 0; nomesL.forEach(function(x){ mks.forEach(function(k){ maxCel=Math.max(maxCel, linhas[x.n][k]||0); }); });
+  var totGeral = totMes.reduce(function(a,b){ return a+b; },0);
+  var maxMes = Math.max.apply(null, totMes.concat([0]));
+  var picoIdx = totMes.indexOf(maxMes);
+  var hojeMk = _mk(hoje);
+
+  var medidaNome = {previsto:'Cronograma previsto (valor distribuído entre início e prazo)', aprovado:'Valor aprovado em orçamentos (mês da aprovação)', propostas:'Quantidade de propostas recebidas (mês do orçamento)'}[_est.medida];
+
+  // ── Filtros
+  var h = `<div class="est-filtros">
+    <div class="est-seg"><span>Escopo</span>
+      <button class="${_est.escopo==='unidade'?'on':''}" onclick="setEst('escopo','unidade')">${escH(state.unit)}</button>
+      <button class="${_est.escopo==='todas'?'on':''}" onclick="setEst('escopo','todas')">Todas as unidades</button></div>
+    <div class="est-seg"><span>Ano</span>
+      <button class="${_est.ano==='todos'?'on':''}" onclick="setEst('ano','todos')">Todos</button>
+      ${anosL.map(function(a){ return `<button class="${String(_est.ano)===a?'on':''}" onclick="setEst('ano','${a}')">${a}</button>`; }).join('')}</div>
+    <div class="est-seg"><span>Medida mensal</span>
+      <button class="${_est.medida==='previsto'?'on':''}" onclick="setEst('medida','previsto')">Previsto</button>
+      <button class="${_est.medida==='aprovado'?'on':''}" onclick="setEst('medida','aprovado')">Aprovado</button>
+      <button class="${_est.medida==='propostas'?'on':''}" onclick="setEst('medida','propostas')">Propostas</button></div>
+    <button class="btn-s" style="margin-left:auto" onclick="exportarMatrizEst()">⬇ CSV da matriz</button>
+  </div>`;
+
+  // ── KPIs
+  var pctExec = contratado ? executado/contratado*100 : 0;
+  var dispMed = dispersoes.length ? dispersoes.reduce(function(a,b){return a+b;},0)/dispersoes.length : 0;
+  h += `<div class="est-kpis">
+    <div class="est-kpi"><div class="l">Valor total das obras</div><div class="v">${fmtValCompact(contratado)}</div><div class="s">${obras.length} obra(s) · ${ativas.length} ativa(s)</div></div>
+    <div class="est-kpi"><div class="l">Executado (estimado)</div><div class="v">${fmtValCompact(executado)}</div><div class="s">${_pct(pctExec)} do total · valor × % físico</div></div>
+    <div class="est-kpi"><div class="l">Saldo a executar</div><div class="v">${fmtValCompact(Math.max(0,contratado-executado))}</div><div class="s">${_pct(100-pctExec)} restante</div></div>
+    <div class="est-kpi"><div class="l">Aprovado em cotações</div><div class="v">${fmtValCompact(aprovTotal)}</div><div class="s">${orcs.filter(function(o){return o.aprovado;}).length} de ${orcs.length} proposta(s)</div></div>
+    <div class="est-kpi good"><div class="l">Economia nas cotações</div><div class="v">${fmtValCompact(economia)}</div><div class="s">vs maior proposta · ${fmtValCompact(economiaMedia)} vs média</div></div>
+    <div class="est-kpi ${atrasadas.length?'bad':''}"><div class="l">Prazo</div><div class="v">${atrasadas.length} <small>atrasada(s)</small></div><div class="s">${risco.length} em risco · ${prazos.filter(function(x){return x.p.sit==='No prazo';}).length} no prazo</div></div>
+  </div>`;
+
+  // ── Insights
+  var ins = [];
+  if(atrasadas.length) ins.push(['bad','⛔', `<b>${atrasadas.length} obra(s) com prazo vencido</b> e não concluídas: ${atrasadas.slice(0,4).map(function(x){ return escH(x.o.nome)+' ('+Math.abs(x.p.dias)+' dias)'; }).join(', ')}${atrasadas.length>4?'…':''}.`]);
+  if(risco.length) ins.push(['warn','⚠', `<b>${risco.length} obra(s) em risco de atraso</b> — avanço físico abaixo de 80% do tempo decorrido: ${risco.slice(0,4).map(function(x){ return escH(x.o.nome)+' (IDP '+x.p.idp.toFixed(2)+')'; }).join(', ')}.`]);
+  var prontas = obras.filter(function(o){ return !_obraFinalizada(o) && pctObra(o)>=100; });
+  if(prontas.length) ins.push(['warn','🏁', `<b>${prontas.length} obra(s) com 100% de avanço ainda não concluída(s)</b>: ${prontas.map(function(o){return escH(o.nome);}).join(', ')}. Conclua em Acompanhamento para liberar os indicadores.`]);
+  if(naoMenor.length) ins.push(['warn','💲', `<b>${naoMenor.length} aprovação(ões) acima do menor preço</b> (diferença total ${fmtVal(naoMenor.reduce(function(a,x){return a+x.dif;},0))}). Registre a justificativa técnica: ${naoMenor.slice(0,3).map(function(x){ return escH(x.o.empresa)+' em '+escH(x.o.segmento||'Geral'); }).join(', ')}.`]);
+  if(cotUnica.length) ins.push(['warn','1️⃣', `<b>${cotUnica.length} segmento(s) com apenas 1 proposta</b> — sem concorrência para comparar preço. Recomenda-se mínimo de 3 cotações.`]);
+  if(economia>0) ins.push(['good','✔', `Cotações geraram <b>${fmtVal(economia)}</b> de economia frente à maior proposta (${_pct(aprovTotal? economia/(aprovTotal+economia)*100:0)} do valor em disputa).`]);
+  if(dispersoes.length) ins.push(['info','↔', `Dispersão média entre menor e maior proposta: <b>${_pct(dispMed)}</b>. ${dispMed>40?'Alta variação: revise se os escopos enviados aos fornecedores estão padronizados.':'Variação saudável entre fornecedores.'}`]);
+  if(maxMes>0) ins.push(['info','📅', `Mês de maior ${isQtd?'volume de propostas':'valor'}: <b>${_mkLbl(mks[picoIdx])}</b> com ${fvL(maxMes)} (${_pct(totGeral?maxMes/totGeral*100:0)} do período).`]);
+  var segTop = Object.keys(segStats).map(function(k){ return segStats[k]; }).sort(function(a,b){ return b.aprovado-a.aprovado; })[0];
+  if(segTop && segTop.aprovado) ins.push(['info','📂', `Segmento com maior valor aprovado: <b>${escH(segTop.seg)}</b> (${fmtVal(segTop.aprovado)}, ${_pct(aprovTotal?segTop.aprovado/aprovTotal*100:0)} do total).`]);
+  var semPrest = ativas.filter(function(o){ return !(o.prestadores||[]).length; });
+  if(semPrest.length) ins.push(['info','👷', `${semPrest.length} obra(s) ativa(s) sem prestador vinculado: ${semPrest.slice(0,4).map(function(o){return escH(o.nome);}).join(', ')}${semPrest.length>4?'…':''}.`]);
+  var semDt = obras.filter(function(o){ return !_cronograma(o); });
+  if(semDt.length) ins.push(['info','🗓', `${semDt.length} obra(s) sem início/prazo ou valor — ficam fora do cronograma previsto. Complete em Cadastrar obra.`]);
+  h += `<div class="card"><div class="sec-t">🧠 Leituras do analista <span>${ins.length} ponto(s)</span></div>
+    ${ins.length ? '<div class="est-ins">'+ins.map(function(i){ return `<div class="est-in ${i[0]}"><span class="ic">${i[1]}</span><div>${i[2]}</div></div>`; }).join('')+'</div>' : '<div style="color:var(--txt3);font-size:13px">Cadastre obras e orçamentos para gerar as análises.</div>'}
+  </div>`;
+
+  // ── Gráfico mensal (barras, uma série)
+  var chart = '';
+  if(mks.length && maxMes>0){
+    var W = Math.max(640, mks.length*46), H = 220, pl = 64, pb = 28, pt = 16, bw = Math.min(30, (W-pl-10)/mks.length*0.62);
+    var esc = function(v){ return (H-pb) - v/maxMes*(H-pb-pt); };
+    var ticks = [0,.25,.5,.75,1].map(function(f){ return isQtd ? Math.round(maxMes*f) : maxMes*f; }).filter(function(t,i,a){ return a.indexOf(t)===i; });
+    var acum = 0;
+    chart = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="${escH(medidaNome)} por mês">
+      ${ticks.map(function(t){ var y=esc(t); return `<line x1="${pl}" x2="${W-6}" y1="${y}" y2="${y}" stroke="#E5E7EB" stroke-width="1"/><text x="${pl-8}" y="${y+4}" text-anchor="end" font-size="10" fill="#6B7280">${fv(t)}</text>`; }).join('')}
+      ${mks.map(function(k,i){
+        var slot=(W-pl-10)/mks.length, x=pl+slot*i+(slot-bw)/2, v=totMes[i], y=esc(v), hh=(H-pb)-y; acum+=v;
+        var r = Math.min(4, hh/2);
+        var path = hh>0 ? `M${x},${H-pb} L${x},${y+r} Q${x},${y} ${x+r},${y} L${x+bw-r},${y} Q${x+bw},${y} ${x+bw},${y+r} L${x+bw},${H-pb} Z` : '';
+        var tip = `<b>${_mkLbl(k)}</b><br>${fvL(v)}<br><span style='opacity:.7'>Acumulado: ${fvL(acum)}</span>`;
+        return `<g class="est-hit" data-tip="${tip}"><rect x="${pl+slot*i}" y="${pt}" width="${slot}" height="${H-pb-pt}" fill="transparent"/>
+          ${path?`<path d="${path}" fill="${k===hojeMk?'#004D23':'#00843D'}"/>`:''}
+          ${i===picoIdx?`<text x="${x+bw/2}" y="${y-5}" text-anchor="middle" font-size="10" font-weight="700" fill="#111827">${fv(v)}</text>`:''}
+          <text x="${x+bw/2}" y="${H-10}" text-anchor="middle" font-size="10" fill="${k===hojeMk?'#004D23':'#6B7280'}" font-weight="${k===hojeMk?700:400}">${_mkLbl(k)}</text></g>`;
+      }).join('')}
+      <line x1="${pl}" x2="${W-6}" y1="${H-pb}" y2="${H-pb}" stroke="#9CA3AF" stroke-width="1"/>
+    </svg>`;
+  }
+  h += `<div class="card"><div class="sec-t">📊 Valores por mês <span>${escH(medidaNome)}</span></div>
+    ${chart ? `<div class="est-scroll">${chart}</div><div class="est-leg">Total no período: <b>${fvL(totGeral)}</b> · Média mensal: <b>${fvL(mks.length?totGeral/mks.length:0)}</b> · barra escura = mês atual</div>`
+            : `<div style="color:var(--txt3);font-size:13px;padding:10px 0">Sem dados com data para esta medida${semData?' ('+semData+' registro(s) sem data)':''}.</div>`}
+  </div>`;
+
+  // ── Matriz obra × mês
+  if(nomesL.length && mks.length){
+    h += `<div class="card"><div class="sec-t">🗓 Matriz obra × mês <span>${nomesL.length} obra(s) · ${mks.length} mês(es)</span></div>
+      <div class="est-scroll"><table class="est-mx"><thead><tr><th class="st">Obra</th>${mks.map(function(k){ return `<th class="${k===hojeMk?'hj':''}">${_mkLbl(k)}</th>`; }).join('')}<th class="tt">Total</th><th class="tt">%</th></tr></thead><tbody>
+      ${nomesL.map(function(x){
+        return `<tr><td class="st" title="${escH(x.n)}">${escH(x.n)}</td>${mks.map(function(k){
+          var v=linhas[x.n][k]||0, c=_seqCor(v,maxCel), esc2=SEQ_G.indexOf(c)>=4;
+          return `<td class="est-hit" style="${c?'background:'+c+';':''}${esc2?'color:#fff;':''}" data-tip="<b>${escH(x.n)}</b><br>${_mkLbl(k)}: ${fvL(v)}">${v?fv(v):''}</td>`;
+        }).join('')}<td class="tt">${fv(x.t)}</td><td class="tt">${_pct(totGeral?x.t/totGeral*100:0)}</td></tr>`;
+      }).join('')}
+      </tbody><tfoot><tr><td class="st">Total do mês</td>${totMes.map(function(v){ return `<td>${v?fv(v):''}</td>`; }).join('')}<td class="tt">${fv(totGeral)}</td><td class="tt">100%</td></tr></tfoot></table></div>
+      <div class="est-leg"><span>menor</span>${SEQ_G.slice(1).map(function(c){ return `<i style="background:${c}"></i>`; }).join('')}<span>maior</span></div>
+    </div>`;
+  }
+
+  // ── Desempenho de prazo
+  var pz = prazos.filter(function(x){ return x.p.ini && x.p.fim; }).sort(function(a,b){ return b.p.nivel-a.p.nivel || (a.p.dias||0)-(b.p.dias||0); });
+  if(pz.length){
+    h += `<div class="card"><div class="sec-t">⏱ Desempenho de prazo <span>IDP = % físico ÷ % do tempo decorrido (≥ 1 no ritmo)</span></div>
+      <div class="est-scroll"><table class="est-tb"><thead><tr><th>Obra</th><th>Início</th><th>Prazo</th><th>Tempo decorrido</th><th>Avanço físico</th><th>IDP</th><th>Término projetado</th><th>Situação</th></tr></thead><tbody>
+      ${pz.map(function(x){
+        var p=x.p, b=_SIT_BDG[p.sit]||['bdg-gray',''];
+        var prevAtraso = p.prev && p.fim && p.prev > p.fim ? Math.round((p.prev-p.fim)/864e5) : 0;
+        return `<tr><td><b>${escH(_estNomeObra(x.o,multi))}</b></td><td>${_fmtD(p.ini)}</td><td>${_fmtD(p.fim)}${p.dias!==null&&p.sit!=='Concluída'?`<div class="mut">${p.dias>=0?p.dias+' dia(s) restantes':Math.abs(p.dias)+' dia(s) vencido'}</div>`:''}</td>
+          <td><div class="est-bar"><i style="width:${p.tempo||0}%;background:#9CA3AF"></i></div><span class="mut">${_pct(p.tempo||0)}</span></td>
+          <td><div class="est-bar"><i style="width:${p.fis}%"></i></div><span class="mut">${p.fis}%</span></td>
+          <td style="font-family:var(--mono)">${p.idp!==null?p.idp.toFixed(2):'—'}</td>
+          <td>${p.prev&&p.sit!=='Concluída'?_fmtD(p.prev)+(prevAtraso?`<div class="mut" style="color:var(--err)">+${prevAtraso} dia(s)</div>`:''):'—'}</td>
+          <td><span class="bdg ${b[0]}">${b[1]} ${p.sit}</span></td></tr>`;
+      }).join('')}</tbody></table></div></div>`;
+  }
+
+  // ── Custo por obra (barras horizontais) + segmentos
+  var porObra = obras.map(function(o){ var c=custoTotalObra(o); return {n:_estNomeObra(o,multi), v:Math.max(c.contrato,c.prestadores), f:pctObra(o)}; }).filter(function(x){ return x.v>0; }).sort(function(a,b){ return b.v-a.v; }).slice(0,12);
+  var maxO = porObra.length ? porObra[0].v : 0;
+  var segs = Object.keys(segStats).map(function(k){ return segStats[k]; }).filter(function(s){ return s.aprovado>0 || s.propostas>0; }).sort(function(a,b){ return b.aprovado-a.aprovado; });
+  var maxS = segs.length ? Math.max.apply(null, segs.map(function(s){ return s.aprovado; })) : 0;
+  h += `<div class="est-2col">
+    <div class="card"><div class="sec-t">🏗 Valor por obra <span>barra clara = valor · escura = executado</span></div>
+      ${porObra.length ? porObra.map(function(x){ return `<div class="est-hb est-hit" data-tip="<b>${escH(x.n)}</b><br>Valor: ${fmtVal(x.v)}<br>Executado: ${fmtVal(x.v*x.f/100)} (${x.f}%)">
+        <div class="n" title="${escH(x.n)}">${escH(x.n)}</div>
+        <div class="t"><i style="width:${x.v/maxO*100}%;background:#CFEAD6"><i style="width:${x.f}%;background:#00843D"></i></i></div>
+        <div class="val">${fmtValCompact(x.v)}</div></div>`; }).join('') : '<div style="color:var(--txt3);font-size:13px">Sem valores cadastrados.</div>'}
+    </div>
+    <div class="card"><div class="sec-t">📂 Segmentos <span>aprovado · economia · propostas</span></div>
+      ${segs.length ? `<div class="est-scroll"><table class="est-tb"><thead><tr><th>Segmento</th><th>Aprovado</th><th>Economia</th><th>Prop./rodada</th></tr></thead><tbody>${segs.map(function(s){
+        return `<tr><td><b>${escH(s.seg)}</b><div class="est-bar" style="width:100%"><i style="width:${maxS?s.aprovado/maxS*100:0}%"></i></div></td><td>${fmtValCompact(s.aprovado)}</td><td style="color:var(--g)">${s.economia?fmtValCompact(s.economia):'—'}</td><td>${(s.propostas/s.rodadas).toFixed(1)}${s.propostas/s.rodadas<3?' <span title="Menos de 3 propostas" style="color:var(--warn)">⚠</span>':''}</td></tr>`; }).join('')}</tbody></table></div>` : '<div style="color:var(--txt3);font-size:13px">Sem orçamentos.</div>'}
+    </div>
+  </div>`;
+
+  // ── Fornecedores
+  var forn = {};
+  orcs.forEach(function(o){
+    var k = String(o.empresa||'—').trim(); var f = forn[k] = forn[k] || {n:k, prop:0, apr:0, vApr:0, desc:[]};
+    f.prop++;
+    if(o.aprovado){
+      f.apr++; f.vApr += _orcVal(o);
+      var g = grupos[o._u+'||'+_orcObraNome(o)+'||'+(o.segmento||'Geral')]||[], vs=g.map(_orcVal).filter(function(v){return v>0;});
+      if(vs.length>1){ var med=vs.reduce(function(a,b){return a+b;},0)/vs.length; if(med>0) f.desc.push((med-_orcVal(o))/med*100); }
+    }
+  });
+  var fl = Object.keys(forn).map(function(k){ return forn[k]; }).sort(function(a,b){ return b.vApr-a.vApr || b.prop-a.prop; }).slice(0,12);
+  if(fl.length){
+    h += `<div class="card"><div class="sec-t">🤝 Fornecedores <span>Top ${fl.length} por valor aprovado</span></div>
+      <div class="est-scroll"><table class="est-tb"><thead><tr><th>Empresa</th><th>Propostas</th><th>Aprovadas</th><th>Taxa de êxito</th><th>Valor aprovado</th><th>Desconto vs média</th></tr></thead><tbody>
+      ${fl.map(function(f){ var dm=f.desc.length?f.desc.reduce(function(a,b){return a+b;},0)/f.desc.length:null;
+        return `<tr><td><b>${escH(f.n)}</b></td><td>${f.prop}</td><td>${f.apr}</td><td><div class="est-bar"><i style="width:${f.apr/f.prop*100}%"></i></div><span class="mut">${_pct(f.apr/f.prop*100)}</span></td><td>${f.vApr?fmtVal(f.vApr):'—'}</td><td style="color:${dm===null?'var(--txt3)':dm>=0?'var(--g)':'var(--err)'}">${dm===null?'—':(dm>=0?'−':'+')+_pct(Math.abs(dm))}</td></tr>`; }).join('')}
+      </tbody></table></div></div>`;
+  }
+
+  el.innerHTML = h;
+  window._estMatriz = {mks:mks, nomes:nomesL, linhas:linhas, medida:_est.medida};
+}
+
+function exportarMatrizEst(){
+  var m = window._estMatriz; if(!m || !m.nomes.length){ mostrarNotify('n-warn','warn','Sem dados na matriz.'); return; }
+  var num = function(v){ return String(Math.round(v*100)/100).replace('.',','); };
+  var rows = [['Obra'].concat(m.mks.map(_mkLbl)).concat(['Total'])];
+  m.nomes.forEach(function(x){ rows.push([x.n].concat(m.mks.map(function(k){ return num(m.linhas[x.n][k]||0); })).concat([num(x.t)])); });
+  var csv = '﻿'+rows.map(function(r){ return r.map(function(c){ return '"'+String(c).replace(/"/g,'""')+'"'; }).join(';'); }).join('\n');
+  var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+  a.download = 'matriz-obra-mes-'+m.medida+'.csv'; a.click();
+}
+
+// Tooltip compartilhado (barras, células, linhas)
+(function(){
+  var tip;
+  document.addEventListener('mousemove', function(e){
+    var t = e.target.closest && e.target.closest('.est-hit');
+    if(!tip){ tip = document.createElement('div'); tip.className='est-tip'; document.body.appendChild(tip); }
+    if(!t){ tip.style.display='none'; return; }
+    tip.innerHTML = t.getAttribute('data-tip'); tip.style.display='block';
+    var x = e.clientX+14, y = e.clientY+14, w = tip.offsetWidth, h2 = tip.offsetHeight;
+    if(x+w > innerWidth-8) x = e.clientX-w-14; if(y+h2 > innerHeight-8) y = e.clientY-h2-14;
+    tip.style.left = x+'px'; tip.style.top = y+'px';
+  });
+})();
 
 // Vincula o orçamento aprovado como prestador na obra. Retorna {obra, jaExiste}
 function _vincularPrestador(orc){
